@@ -124,6 +124,8 @@ Todo el proyecto se encuentra contenido en un único archivo.
 
 ## 👨‍💻 Autor
 
+
+Juan David Vega Alfonso, estudiante de ingenieria de sistemas de la universidad catolica
 Desarrollado como herramienta de optimización para procesos de corte de vidrio y materiales rectangulares.
 
 ---
