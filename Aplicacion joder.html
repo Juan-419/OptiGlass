@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Optimizador de Corte de Vidrio</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f4f0;
+      --bg2: #eeede8;
+      --surface: #ffffff;
+      --border: rgba(0,0,0,0.15);
+      --border2: rgba(0,0,0,0.25);
+      --text: #1a1a18;
+      --text2: #6b6a64;
+      --text3: #9c9a92;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --green: #1D9E75;
+      --amber: #BA7517;
+      --red: #D85A30;
+      --font: system-ui, -apple-system, sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1e1e1c;
+        --bg2: #2a2a28;
+        --surface: #242422;
+        --border: rgba(255,255,255,0.12);
+        --border2: rgba(255,255,255,0.22);
+        --text: #e8e6de;
+        --text2: #9c9a92;
+        --text3: #6b6a64;
+      }
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    .app { width: 100%; max-width: 720px; }
+
+    h1 { font-size: 22px; font-weight: 500; margin-bottom: 4px; }
+    .subtitle { font-size: 14px; color: var(--text2); margin-bottom: 2rem; }
+
+    .panels {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 520px) { .panels { grid-template-columns: 1fr; } }
+
+    .panel {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+    }
+
+    .panel h2 {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 14px;
+    }
+
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px; }
+
+    input[type="number"] {
+      width: 100%;
+      height: 36px;
+      border: 0.5px solid var(--border2);
+      border-radius: var(--radius-md);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      padding: 0 10px;
+      outline: none;
+      transition: border-color .15s;
+      font-family: var(--font);
+    }
+
+    input[type="number"]:focus { border-color: var(--text2); }
+
+    .cuts-list { max-height: 180px; overflow-y: auto; padding-right: 2px; }
+
+    .cut-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+      background: var(--bg2);
+      border-radius: var(--radius-md);
+      padding: 6px 8px;
+    }
+
+    .cut-item input[type="number"] {
+      height: 28px;
+      font-size: 13px;
+      background: var(--surface);
+    }
+
+    .cut-num { font-size: 11px; color: var(--text3); min-width: 14px; text-align: center; }
+    .cut-sep { font-size: 11px; color: var(--text3); }
+
+    .del-btn {
+      width: 22px; height: 22px;
+      border: none; background: none; cursor: pointer;
+      color: var(--text3); font-size: 16px; line-height: 1;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 4px; flex-shrink: 0;
+      transition: background .1s, color .1s;
+    }
+
+    .del-btn:hover { background: var(--border); color: var(--text); }
+
+    .btn-add {
+      width: 100%; height: 34px;
+      border: 0.5px dashed var(--border2);
+      border-radius: var(--radius-md);
+      background: none; color: var(--text2);
+      font-size: 13px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      gap: 6px; margin-top: 10px;
+      transition: background .15s, color .15s;
+      font-family: var(--font);
+    }
+
+    .btn-add:hover { background: var(--bg2); color: var(--text); }
+
+    .btn-calc {
+      width: 100%; height: 42px;
+      border: none; border-radius: var(--radius-md);
+      background: var(--text); color: var(--bg);
+      font-size: 14px; font-weight: 500;
+      cursor: pointer; margin-top: 1rem;
+      transition: opacity .15s;
+      font-family: var(--font);
+    }
+
+    .btn-calc:hover { opacity: 0.82; }
+
+    .err {
+      font-size: 13px; color: var(--red);
+      margin-top: 8px; display: none;
+      padding: 8px 12px;
+      background: rgba(216,90,48,0.08);
+      border-radius: var(--radius-md);
+      border-left: 3px solid var(--red);
+    }
+
+    .result-area { display: none; margin-top: 1.5rem; }
+    .result-area.visible { display: block; }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 1rem;
+    }
+
+    .metric {
+      background: var(--bg2);
+      border-radius: var(--radius-md);
+      padding: 14px 12px;
+    }
+
+    .metric .val {
+      font-size: 24px; font-weight: 500;
+      color: var(--text); line-height: 1;
+      margin-bottom: 5px;
+    }
+
+    .metric .lbl { font-size: 12px; color: var(--text2); }
+    .metric.good .val { color: var(--green); }
+    .metric.warn .val { color: var(--amber); }
+    .metric.bad  .val { color: var(--red); }
+
+    .advice {
+      border-radius: var(--radius-md);
+      border-left: 3px solid var(--green);
+      background: rgba(29,158,117,0.07);
+      padding: 12px 16px;
+      font-size: 13px; line-height: 1.7;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+
+    .advice.warn { border-left-color: var(--amber); background: rgba(186,117,23,0.07); }
+    .advice.bad  { border-left-color: var(--red);   background: rgba(216,90,48,0.07); }
+    .advice strong { font-weight: 500; }
+
+    .viz-panel {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .viz-panel h2 {
+      font-size: 11px; font-weight: 500;
+      color: var(--text3); text-transform: uppercase;
+      letter-spacing: 0.07em; margin-bottom: 14px;
+    }
+
+    #canvas-wrap { overflow-x: auto; }
+    canvas { display: block; border-radius: 6px; max-width: 100%; }
+
+    .legend {
+      display: flex; flex-wrap: wrap;
+      gap: 12px; margin-top: 12px;
+    }
+
+    .leg-item {
+      display: flex; align-items: center;
+      gap: 6px; font-size: 12px; color: var(--text2);
+    }
+
+    .leg-dot {
+      width: 12px; height: 12px;
+      border-radius: 2px; flex-shrink: 0;
+    }
+
+    footer {
+      text-align: center; font-size: 12px;
+      color: var(--text3); margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <h1>Optimizador de corte de vidrio</h1>
+  <p class="subtitle">Ingresa la lámina y las piezas que necesitas cortar para calcular el aprovechamiento óptimo.</p>
+
+  <div class="panels">
+    <div class="panel">
+      <h2>Lámina disponible</h2>
+      <div class="field">
+        <label>Ancho (cm)</label>
+        <input type="number" id="sheet-w" value="240" min="1" placeholder="ej. 240">
+      </div>
+      <div class="field">
+        <label>Alto (cm)</label>
+        <input type="number" id="sheet-h" value="160" min="1" placeholder="ej. 160">
+      </div>
+      <div class="field">
+        <label>Margen de corte / kerf (mm)</label>
+        <input type="number" id="kerf" value="3" min="0" max="20" step="0.5" placeholder="ej. 3">
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Piezas a cortar</h2>
+      <div class="cuts-list" id="cuts-list"></div>
+      <button class="btn-add" onclick="addCut()">+ Agregar pieza</button>
+    </div>
+  </div>
+
+  <p class="err" id="err-msg"></p>
+  <button class="btn-calc" onclick="calculate()">Calcular corte óptimo</button>
+
+  <div class="result-area" id="result-area">
+    <div class="metrics" id="metrics"></div>
+    <div class="advice" id="advice-box"></div>
+    <div class="viz-panel">
+      <h2>Distribución visual</h2>
+      <div id="canvas-wrap"><canvas id="cv"></canvas></div>
+      <div class="legend" id="legend"></div>
+    </div>
+  </div>
+
+  <footer>Vidriería — Optimizador de corte v1.0</footer>
+</div>
+
+<script>
+  const COLORS = [
+    '#5DCAA5','#85B7EB','#F0997B','#C0DD97','#F4C0D1','#B5D4F4',
+    '#FAC775','#9FE1CB','#F7C1C1','#AFA9EC','#EF9F27','#1D9E75'
+  ];
+
+  let cuts = [];
+  let cutId = 0;
+
+  function addCut(w='', h='', qty=1) {
+    const id = cutId++;
+    cuts.push({ id, w, h, qty });
+    renderCuts();
+  }
+
+  function removeCut(id) {
+    cuts = cuts.filter(c => c.id !== id);
+    renderCuts();
+  }
+
+  function renderCuts() {
+    const list = document.getElementById('cuts-list');
+    list.innerHTML = '';
+    if (cuts.length === 0) {
+      list.innerHTML = '<p style="font-size:12px;color:var(--text3);text-align:center;padding:14px 0">Sin piezas aún</p>';
+      return;
+    }
+    cuts.forEach((c, i) => {
+      const div = document.createElement('div');
+      div.className = 'cut-item';
+      div.innerHTML = `
+        <span class="cut-num">${i+1}</span>
+        <input type="number" min="1" placeholder="Ancho" title="Ancho cm" value="${c.w}" style="width:62px" oninput="cuts[${i}].w=this.value">
+        <span class="cut-sep">×</span>
+        <input type="number" min="1" placeholder="Alto" title="Alto cm" value="${c.h}" style="width:62px" oninput="cuts[${i}].h=this.value">
+        <input type="number" min="1" placeholder="×" title="Cantidad" value="${c.qty}" style="width:42px" oninput="cuts[${i}].qty=+this.value">
+        <button class="del-btn" onclick="removeCut(${c.id})" title="Eliminar">×</button>
+      `;
+      list.appendChild(div);
+    });
+  }
+
+  function showErr(msg) {
+    const el = document.getElementById('err-msg');
+    el.textContent = msg;
+    el.style.display = msg ? 'block' : 'none';
+  }
+
+  function calculate() {
+    showErr('');
+    document.getElementById('result-area').className = 'result-area';
+
+    const SW = parseFloat(document.getElementById('sheet-w').value);
+    const SH = parseFloat(document.getElementById('sheet-h').value);
+    const kerf = parseFloat(document.getElementById('kerf').value) / 10; // mm a cm
+
+    if (!SW || !SH || SW <= 0 || SH <= 0) { showErr('Ingresa dimensiones válidas para la lámina.'); return; }
+    if (cuts.length === 0) { showErr('Agrega al menos una pieza para cortar.'); return; }
+
+    let pieces = [];
+    for (let c of cuts) {
+      const w = parseFloat(c.w), h = parseFloat(c.h), qty = parseInt(c.qty) || 1;
+      if (!w || !h || w <= 0 || h <= 0) { showErr('Verifica que todas las piezas tengan dimensiones válidas.'); return; }
+      if (w > SW && h > SH) { showErr(`La pieza ${w}×${h} cm no cabe en la lámina ${SW}×${SH} cm.`); return; }
+      if (w > SW || h > SH) {
+        // intentar rotación
+        if (h <= SW && w <= SH) {
+          for (let i = 0; i < qty; i++) pieces.push({ w: h + kerf, h: w + kerf, origW: w, origH: h });
+          continue;
+        } else { showErr(`La pieza ${w}×${h} cm no cabe en la lámina ni rotada.`); return; }
+      }
+      for (let i = 0; i < qty; i++) pieces.push({ w: w + kerf, h: h + kerf, origW: w, origH: h });
+    }
+
+    // Ordenar por área descendente
+    pieces.sort((a, b) => (b.w * b.h) - (a.w * a.h));
+
+    const result = guillotinePack(pieces, SW, SH, kerf);
+    if (!result) { showErr('No fue posible acomodar todas las piezas. La lámina es demasiado pequeña para este pedido.'); return; }
+
+    renderResult(result, SW, SH, kerf);
+  }
+
+  // Algoritmo Guillotine Best Short Side Fit (BSSF)
+  function guillotinePack(pieces, SW, SH, kerf) {
+    let freeRects = [{ x: 0, y: 0, w: SW, h: SH }];
+    let placed = [];
+    const colorMap = {};
+    let colorIdx = 0;
+
+    for (let piece of pieces) {
+      const key = `${piece.origW}x${piece.origH}`;
+      if (!(key in colorMap)) colorMap[key] = COLORS[colorIdx++ % COLORS.length];
+
+      let bestScore = Infinity, bestIdx = -1, bestRot = false;
+
+      for (let i = 0; i < freeRects.length; i++) {
+        const r = freeRects[i];
+        for (let rot of [false, true]) {
+          const pw = rot ? piece.h : piece.w;
+          const ph = rot ? piece.w : piece.h;
+          if (pw <= r.w + 0.001 && ph <= r.h + 0.001) {
+            const score = Math.min(r.w - pw, r.h - ph);
+            if (score < bestScore) { bestScore = score; bestIdx = i; bestRot = rot; }
+          }
+        }
+      }
+
+      if (bestIdx === -1) return null;
+
+      const r = freeRects[bestIdx];
+      const pw = bestRot ? piece.h : piece.w;
+      const ph = bestRot ? piece.w : piece.h;
+
+      placed.push({
+        x: r.x, y: r.y,
+        w: pw - kerf, h: ph - kerf,
+        origW: piece.origW, origH: piece.origH,
+        color: colorMap[key]
+      });
+
+      // Dividir espacio libre (split horizontal primero si la pieza es más ancha que alta)
+      const splitH = pw > ph;
+      const newRects = [];
+      if (splitH) {
+        if (r.h - ph > 0.5) newRects.push({ x: r.x,    y: r.y + ph, w: pw,      h: r.h - ph });
+        if (r.w - pw > 0.5) newRects.push({ x: r.x + pw, y: r.y,   w: r.w - pw, h: r.h });
+      } else {
+        if (r.w - pw > 0.5) newRects.push({ x: r.x + pw, y: r.y,   w: r.w - pw, h: ph });
+        if (r.h - ph > 0.5) newRects.push({ x: r.x,    y: r.y + ph, w: r.w,      h: r.h - ph });
+      }
+
+      freeRects.splice(bestIdx, 1);
+      for (let nr of newRects) freeRects.push(nr);
+    }
+
+    return { placed, freeRects };
+  }
+
+  function renderResult(pack, SW, SH, kerf) {
+    const { placed, freeRects } = pack;
+    const totalSheet = SW * SH;
+    const totalUsed = placed.reduce((s, p) => s + p.origW * p.origH, 0);
+    const pct = (totalUsed / totalSheet * 100).toFixed(1);
+    const waste = (100 - pct).toFixed(1);
+
+    const rArea = document.getElementById('result-area');
+    rArea.className = 'result-area visible';
+
+    // Métricas
+    const cls = pct >= 85 ? 'good' : pct >= 65 ? 'warn' : 'bad';
+    document.getElementById('metrics').innerHTML = `
+      <div class="metric ${cls}">
+        <div class="val">${pct}%</div>
+        <div class="lbl">Aprovechamiento</div>
+      </div>
+      <div class="metric">
+        <div class="val">${waste}%</div>
+        <div class="lbl">Desperdicio</div>
+      </div>
+      <div class="metric">
+        <div class="val">${placed.length}</div>
+        <div class="lbl">Piezas colocadas</div>
+      </div>
+    `;
+
+    // Consejo
+    let msg = '', acls = 'advice';
+    if (pct >= 85) {
+      msg = `<strong>✓ Corte óptimo.</strong> Se aprovecha el ${pct}% de la lámina (${waste}% de desperdicio). Puedes proceder con confianza.`;
+    } else if (pct >= 65) {
+      msg = `<strong>⚠ Corte aceptable.</strong> Se aprovecha el ${pct}% de la lámina. Considera si puedes agregar más piezas o usar una lámina más pequeña para reducir el sobrante (${waste}%).`;
+      acls = 'advice warn';
+    } else {
+      msg = `<strong>✗ Corte ineficiente.</strong> Solo se aprovecha el ${pct}% de la lámina (${waste}% de desperdicio). Usa una lámina más pequeña, agrega más piezas al pedido, o guarda los sobrantes grandes para pedidos futuros.`;
+      acls = 'advice bad';
+    }
+    const adv = document.getElementById('advice-box');
+    adv.className = acls;
+    adv.innerHTML = msg;
+
+    drawCanvas(placed, SW, SH);
+
+    // Leyenda
+    const seen = {};
+    placed.forEach(p => { const k = `${p.origW} × ${p.origH} cm`; seen[k] = p.color; });
+    const legDiv = document.getElementById('legend');
+    legDiv.innerHTML = Object.entries(seen).map(([k, c]) =>
+      `<div class="leg-item"><div class="leg-dot" style="background:${c}"></div>${k}</div>`
+    ).join('') +
+    `<div class="leg-item"><div class="leg-dot" style="background:rgba(128,128,128,0.15);border:0.5px solid #aaa"></div>Sobrante</div>`;
+  }
+
+  function drawCanvas(placed, SW, SH) {
+    const wrap = document.getElementById('canvas-wrap');
+    const maxW = wrap.offsetWidth || 640;
+    const scale = Math.min((maxW - 8) / SW, 420 / SH);
+    const cW = Math.round(SW * scale);
+    const cH = Math.round(SH * scale);
+
+    const cv = document.getElementById('cv');
+    cv.width = cW; cv.height = cH;
+    const ctx = cv.getContext('2d');
+
+    const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    // Fondo (sobrante)
+    ctx.fillStyle = dark ? '#2a2a28' : '#f0efe9';
+    ctx.fillRect(0, 0, cW, cH);
+
+    // Borde lámina
+    ctx.strokeStyle = dark ? '#555' : '#bbb';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(0.5, 0.5, cW - 1, cH - 1);
+
+    for (const p of placed) {
+      const x = Math.round(p.x * scale);
+      const y = Math.round(p.y * scale);
+      const w = Math.round(p.w * scale);
+      const h = Math.round(p.h * scale);
+
+      // Relleno con transparencia
+      ctx.fillStyle = p.color + 'bb';
+      ctx.fillRect(x, y, w, h);
+
+      // Borde pieza
+      ctx.strokeStyle = p.color;
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+
+      // Etiqueta centrada
+      const lbl = `${p.origW}×${p.origH}`;
+      const fs = Math.max(9, Math.min(13, w / (lbl.length * 0.7), h * 0.32));
+      ctx.font = `500 ${fs}px ${getComputedStyle(document.body).fontFamily}`;
+      const tw = ctx.measureText(lbl).width;
+
+      if (tw + 8 < w && fs + 4 < h) {
+        const tx = x + w / 2;
+        const ty = y + h / 2;
+        ctx.fillStyle = dark ? 'rgba(0,0,0,0.65)' : 'rgba(255,255,255,0.80)';
+        ctx.fillRect(tx - tw / 2 - 3, ty - fs / 2 - 2, tw + 6, fs + 5);
+        ctx.fillStyle = dark ? '#e8e6de' : '#1a1a18';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(lbl, tx, ty);
+      }
+    }
+  }
+
+  // Piezas de ejemplo al cargar
+  addCut(60, 40, 2);
+  addCut(80, 60, 1);
+  addCut(30, 30, 3);
+</script>
+</body>
+</html>
