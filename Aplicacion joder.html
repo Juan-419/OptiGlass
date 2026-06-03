@@ -477,7 +477,7 @@
     legDiv.innerHTML = Object.entries(seen).map(([k, c]) =>
       `<div class="leg-item"><div class="leg-dot" style="background:${c}"></div>${k}</div>`
     ).join('') +
-    `<div class="leg-item"><div class="leg-dot" style="background:#fff3b0;border:0.5px solid #aaa"></div>Sobrante</div>`;
+    `<div class="leg-item"><div class="leg-dot" style="background:rgba(128,128,128,0.15);border:0.5px solid #aaa"></div>Sobrante</div>`;
   }
 
   function drawCanvas(placed, SW, SH) {
@@ -493,8 +493,8 @@
 
     const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-    // Fondo (sobrante) amarillo
-    ctx.fillStyle = dark ? '#8a6d00' : '#fff3b0';
+    // Fondo (sobrante)
+    ctx.fillStyle = dark ? '#2a2a28' : '#f0efe9';
     ctx.fillRect(0, 0, cW, cH);
 
     // Borde lámina
