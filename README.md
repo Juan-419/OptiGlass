@@ -1,160 +1,91 @@
-# 🪟 OptiGlass
+# OptiGlass
 
-**OptiGlass** es una aplicación web desarrollada en HTML, CSS y JavaScript que permite optimizar el corte de piezas rectangulares sobre una lámina de vidrio. Su objetivo es maximizar el aprovechamiento del material, reducir desperdicios y ofrecer una representación visual clara de la distribución de corte.
+OptiGlass es una aplicacion web para optimizar cortes rectangulares sobre una lamina de vidrio u otros materiales planos. Permite registrar piezas con cantidades, calcular una distribucion de corte y visualizar el aprovechamiento del material en un plano interactivo.
 
-## ✨ Características
+## Caracteristicas
 
-- 📏 Configuración de dimensiones de la lámina de vidrio.
-- ✂️ Ajuste del margen de corte (kerf).
-- 📦 Gestión de múltiples piezas con cantidades personalizadas.
-- 🔄 Rotación automática de piezas para mejorar el ajuste.
-- 📊 Cálculo del porcentaje de aprovechamiento.
-- 🗑️ Cálculo del porcentaje de desperdicio.
-- 🎨 Visualización gráfica del plano de corte.
-- 🌙 Compatibilidad con modo claro y modo oscuro.
-- ⚡ Funciona completamente en el navegador sin dependencias externas.
+- Configuracion de ancho, alto y margen de corte de la lamina.
+- Registro de multiples piezas con cantidad, duplicado y eliminacion.
+- Validaciones para dimensiones, cantidades y piezas que no caben.
+- Rotacion automatica de piezas cuando mejora el acomodo.
+- Algoritmo multipasada basado en Guillotine Best Short Side Fit.
+- Metricas de aprovechamiento, desperdicio, piezas colocadas y sobrante.
+- Plano visual en Canvas con colores, leyenda y marcas de piezas rotadas.
+- Exportacion del plano como imagen PNG.
+- Guardado automatico del ultimo pedido en el navegador.
+- Compatibilidad con modo claro y modo oscuro.
 
----
-
-## 🚀 Tecnologías utilizadas
-
-- HTML5
-- CSS3
-- JavaScript (Vanilla JS)
-- Canvas API
-
----
-
-## 📋 Cómo usar
-
-1. Ingresa las dimensiones de la lámina disponible.
-2. Define el margen de corte (kerf) en milímetros.
-3. Agrega las piezas necesarias indicando:
-   - Ancho (cm)
-   - Alto (cm)
-   - Cantidad
-4. Haz clic en **"Calcular corte óptimo"**.
-5. Revisa los resultados obtenidos:
-   - Aprovechamiento de la lámina.
-   - Desperdicio estimado.
-   - Cantidad de piezas colocadas.
-   - Plano visual de distribución.
-
----
-
-## 🧠 Algoritmo de optimización
-
-OptiGlass utiliza una variante del algoritmo:
-
-### Guillotine Best Short Side Fit (BSSF)
-
-Este algoritmo:
-
-- Ordena las piezas de mayor a menor área.
-- Busca el mejor espacio libre para cada pieza.
-- Permite rotaciones cuando mejoran el ajuste.
-- Divide el espacio restante en nuevos rectángulos libres.
-
-Esto permite obtener distribuciones eficientes en tiempo real para la mayoría de escenarios de corte rectangular.
-
----
-
-## 📊 Interpretación de resultados
-
-### ✅ Corte óptimo
-Aprovechamiento igual o superior al **85%**.
-
-### ⚠️ Corte aceptable
-Aprovechamiento entre **65% y 84%**.
-
-### ❌ Corte ineficiente
-Aprovechamiento inferior al **65%**.
-
----
-
-## 🎨 Visualización
-
-El plano de corte muestra:
-
-- Piezas coloreadas según sus dimensiones.
-- Etiquetas con las medidas originales.
-- Área sobrante resaltada para facilitar su identificación.
-- Leyenda automática de piezas utilizadas.
-
----
-
-## 🛠 Instalación
-
-No requiere instalación.
-
-### Método 1: Uso local
-
-1. Descarga el archivo `index.html`.
-2. Ábrelo en cualquier navegador moderno:
-   - Google Chrome
-   - Microsoft Edge
-   - Mozilla Firefox
-   - Opera
-
-### Método 2: Publicación web
-
-Puedes alojar el archivo en cualquier servicio de hosting estático como:
-
-- :contentReference[oaicite:0]{index=0}
-- :contentReference[oaicite:1]{index=1}
-- :contentReference[oaicite:2]{index=2}
-
----
-
-## 📂 Estructura del proyecto
+## Estructura
 
 ```text
 OptiGlass/
-│
-├── index.html
-└── README.md
+|-- index.html
+|-- server.py
+|-- requirements.txt
+`-- README.md
 ```
 
-Todo el proyecto está contenido en un único archivo HTML para facilitar su distribución y mantenimiento.
+## Uso local
 
----
+### Opcion 1: abrir el archivo
 
-## 🔮 Mejoras futuras
+Abre `index.html` directamente en un navegador moderno.
 
-- Soporte para múltiples láminas.
-- Exportación a PDF.
-- Exportación a imagen PNG.
-- Generación de reportes de corte.
-- Historial de optimizaciones.
-- Gestión de inventario de sobrantes.
-- Soporte para materiales distintos al vidrio.
-- Optimización avanzada mediante algoritmos evolutivos.
+### Opcion 2: usar Flask
 
----
+Instala dependencias:
 
-## 💡 Casos de uso
+```bash
+pip install -r requirements.txt
+```
 
-OptiGlass puede utilizarse para:
+Ejecuta el servidor:
 
-- Vidrierías.
-- Talleres de aluminio y vidrio.
-- Carpinterías.
-- Corte de MDF.
-- Corte de acrílico.
-- Corte de láminas metálicas.
-- Procesos de manufactura ligera.
+```bash
+python server.py
+```
 
----
+Luego abre:
 
-## 👨‍💻 Autor
+```text
+http://127.0.0.1:5000
+```
 
-Juan David Vega Alfonso, estudiante de la universidad catolica del programa de ingenieria de sistemas
-Desarrollado como una herramienta práctica para la optimización de cortes rectangulares y el aprovechamiento eficiente de materiales.
+## Como usar
 
----
+1. Ingresa las dimensiones de la lamina.
+2. Ajusta el margen de corte o kerf en milimetros.
+3. Agrega las piezas con ancho, alto y cantidad.
+4. Haz clic en `Calcular corte optimo`.
+5. Revisa las metricas, el plano de corte y la leyenda.
+6. Usa `Exportar PNG` para guardar el plano.
 
-## 📄 Licencia
+## Algoritmo
 
-MIT License
+La aplicacion usa una variante del algoritmo Guillotine Best Short Side Fit. Para mejorar el resultado, prueba varias ordenaciones de piezas: area, lado mayor, ancho, alto y diferencia entre lados. En cada intento permite rotacion y conserva la mejor distribucion encontrada.
 
-Puedes usar, modificar, distribuir y adaptar este proyecto libremente, conservando el aviso de licencia correspondiente.
+El kerf se aplica como separacion entre cortes al dividir los rectangulos libres. Esto evita rechazar piezas que caben justo en el borde de la lamina, pero mantiene espacio para el margen de corte entre piezas.
+
+## Interpretacion
+
+- Corte eficiente: aprovechamiento igual o superior al 85%.
+- Corte aceptable: aprovechamiento entre 65% y 84.9%.
+- Corte ineficiente: aprovechamiento inferior al 65%.
+
+## Mejoras incluidas en v1.1
+
+- Correccion de textos con codificacion rota.
+- Renombrado del archivo principal a `index.html`.
+- Actualizacion del servidor Flask.
+- Validaciones mas estrictas.
+- Guardado automatico con `localStorage`.
+- Botones para cargar ejemplo, limpiar, duplicar piezas y exportar PNG.
+- Visualizacion mas legible y responsive.
+
+## Autor
+
+Juan David Vega Alfonso, estudiante de Ingenieria de Sistemas.
+
+## Licencia
+
+MIT License.

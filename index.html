@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OptiGlass</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    :root {
+      --bg: #f6f7f8;
+      --band: #eceff1;
+      --surface: #ffffff;
+      --surface-2: #f1f3f4;
+      --border: #d5dade;
+      --border-strong: #aeb7bd;
+      --text: #172025;
+      --muted: #65737c;
+      --soft: #8b9aa3;
+      --accent: #087f7a;
+      --accent-strong: #075f5b;
+      --amber: #9a6412;
+      --red: #c74f2b;
+      --green: #16805e;
+      --focus: rgba(8, 127, 122, 0.24);
+      --shadow: 0 14px 34px rgba(18, 31, 37, 0.08);
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 10px;
+      --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111719;
+        --band: #182225;
+        --surface: #1d282b;
+        --surface-2: #253236;
+        --border: #334247;
+        --border-strong: #52656d;
+        --text: #edf3f4;
+        --muted: #a8b6bc;
+        --soft: #7d9098;
+        --accent: #42c2b4;
+        --accent-strong: #7ee0d5;
+        --amber: #dda23a;
+        --red: #ed7c58;
+        --green: #55c594;
+        --focus: rgba(66, 194, 180, 0.28);
+        --shadow: 0 18px 42px rgba(0, 0, 0, 0.26);
+      }
+    }
+
+    html { min-height: 100%; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      background: linear-gradient(180deg, var(--band), var(--bg) 260px);
+      color: var(--text);
+      font-family: var(--font);
+      padding: 24px;
+    }
+
+    button, input {
+      color: inherit;
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    .app {
+      width: min(1120px, 100%);
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(24px, 3vw, 34px);
+      font-weight: 720;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 0;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .panel,
+    .result-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+    }
+
+    .panel {
+      padding: 18px;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .panel-title {
+      margin: 0;
+      color: var(--soft);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .sheet-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field.full { grid-column: 1 / -1; }
+
+    label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      min-width: 0;
+      height: 38px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface-2);
+      padding: 0 10px;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    }
+
+    input[type="number"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--focus);
+      background: var(--surface);
+    }
+
+    .cuts-list {
+      display: grid;
+      gap: 8px;
+      max-height: 350px;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+
+    .cut-item {
+      display: grid;
+      grid-template-columns: 28px minmax(68px, 1fr) minmax(68px, 1fr) 64px 32px 32px;
+      gap: 7px;
+      align-items: end;
+      background: var(--surface-2);
+      border: 1px solid transparent;
+      border-radius: var(--radius-md);
+      padding: 8px;
+    }
+
+    .cut-index {
+      align-self: center;
+      display: grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .cut-field {
+      display: grid;
+      gap: 4px;
+    }
+
+    .cut-field label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .cut-field input {
+      height: 34px;
+      background: var(--surface);
+    }
+
+    .icon-btn {
+      display: inline-grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+
+    .icon-btn:hover {
+      border-color: var(--border-strong);
+      color: var(--text);
+    }
+
+    .icon-btn.danger:hover {
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 38px;
+      border-radius: var(--radius-md);
+      padding: 0 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 700;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+
+    .btn:hover {
+      border-color: var(--border-strong);
+      background: var(--surface-2);
+    }
+
+    .btn.primary {
+      width: 100%;
+      min-height: 44px;
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+      margin-top: 12px;
+    }
+
+    .btn.primary:hover {
+      background: var(--accent-strong);
+      border-color: var(--accent-strong);
+    }
+
+    .btn.subtle {
+      color: var(--muted);
+    }
+
+    .empty-state {
+      border: 1px dashed var(--border-strong);
+      border-radius: var(--radius-md);
+      color: var(--muted);
+      padding: 18px;
+      text-align: center;
+      font-size: 13px;
+    }
+
+    .error {
+      display: none;
+      margin-top: 12px;
+      border-left: 4px solid var(--red);
+      border-radius: var(--radius-md);
+      background: color-mix(in srgb, var(--red) 12%, transparent);
+      color: var(--text);
+      padding: 11px 12px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .error.visible { display: block; }
+
+    .result-panel {
+      display: none;
+      overflow: hidden;
+    }
+
+    .result-panel.visible {
+      display: block;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .metric {
+      min-height: 86px;
+      background: var(--surface);
+      padding: 15px;
+    }
+
+    .metric .value {
+      margin-bottom: 7px;
+      font-size: clamp(22px, 3vw, 30px);
+      font-weight: 760;
+      line-height: 1;
+    }
+
+    .metric .label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .metric.good .value { color: var(--green); }
+    .metric.warn .value { color: var(--amber); }
+    .metric.bad .value { color: var(--red); }
+
+    .advice {
+      margin: 0;
+      border-bottom: 1px solid var(--border);
+      padding: 14px 18px;
+      color: var(--text);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .advice.good { border-left: 4px solid var(--green); }
+    .advice.warn { border-left: 4px solid var(--amber); }
+    .advice.bad { border-left: 4px solid var(--red); }
+
+    .canvas-section {
+      padding: 18px;
+    }
+
+    .canvas-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .canvas-wrap {
+      width: 100%;
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background:
+        linear-gradient(45deg, color-mix(in srgb, var(--surface-2) 78%, transparent) 25%, transparent 25%),
+        linear-gradient(-45deg, color-mix(in srgb, var(--surface-2) 78%, transparent) 25%, transparent 25%);
+      background-size: 18px 18px;
+    }
+
+    canvas {
+      display: block;
+      max-width: 100%;
+      height: auto;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px 14px;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 20px;
+    }
+
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      flex: 0 0 auto;
+    }
+
+    .footer {
+      margin-top: 16px;
+      color: var(--soft);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    @media (max-width: 880px) {
+      body { padding: 16px; }
+
+      .topbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .toolbar {
+        justify-content: stretch;
+      }
+
+      .toolbar .btn {
+        flex: 1 1 140px;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .panel { padding: 14px; }
+
+      .sheet-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .cut-item {
+        grid-template-columns: 28px 1fr 1fr;
+      }
+
+      .cut-field.qty {
+        grid-column: 2 / 3;
+      }
+
+      .cut-item .icon-btn {
+        align-self: end;
+      }
+
+      .metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <h1>OptiGlass</h1>
+        <p class="subtitle">Optimizador de cortes rectangulares para laminas de vidrio.</p>
+      </div>
+      <div class="toolbar" aria-label="Acciones de la aplicacion">
+        <button class="btn subtle" id="sample-btn" type="button" title="Cargar ejemplo">Ejemplo</button>
+        <button class="btn subtle" id="clear-btn" type="button" title="Limpiar formulario">Limpiar</button>
+        <button class="btn" id="export-btn" type="button" title="Exportar plano como PNG" disabled>Exportar PNG</button>
+      </div>
+    </header>
+
+    <section class="layout">
+      <div class="stack">
+        <section class="panel" aria-labelledby="sheet-title">
+          <div class="panel-head">
+            <h2 class="panel-title" id="sheet-title">Lamina disponible</h2>
+          </div>
+          <div class="sheet-grid">
+            <div class="field">
+              <label for="sheet-w">Ancho (cm)</label>
+              <input type="number" id="sheet-w" value="240" min="1" step="0.1" inputmode="decimal">
+            </div>
+            <div class="field">
+              <label for="sheet-h">Alto (cm)</label>
+              <input type="number" id="sheet-h" value="160" min="1" step="0.1" inputmode="decimal">
+            </div>
+            <div class="field full">
+              <label for="kerf">Margen de corte / kerf (mm)</label>
+              <input type="number" id="kerf" value="3" min="0" max="20" step="0.5" inputmode="decimal">
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="pieces-title">
+          <div class="panel-head">
+            <h2 class="panel-title" id="pieces-title">Piezas</h2>
+            <button class="btn" id="add-btn" type="button" title="Agregar pieza">+ Agregar</button>
+          </div>
+          <div class="cuts-list" id="cuts-list"></div>
+          <p class="error" id="err-msg" role="alert"></p>
+          <button class="btn primary" id="calc-btn" type="button">Calcular corte optimo</button>
+        </section>
+      </div>
+
+      <section class="result-panel" id="result-area" aria-live="polite">
+        <div class="metrics" id="metrics"></div>
+        <p class="advice" id="advice-box"></p>
+        <div class="canvas-section">
+          <div class="canvas-head">
+            <h2 class="panel-title">Distribucion visual</h2>
+          </div>
+          <div class="canvas-wrap" id="canvas-wrap">
+            <canvas id="cv" width="860" height="560"></canvas>
+          </div>
+          <div class="legend" id="legend"></div>
+        </div>
+      </section>
+    </section>
+
+    <footer class="footer">OptiGlass - Optimizador de corte v1.1</footer>
+  </main>
+
+  <script>
+    const STORAGE_KEY = 'optiglass-state-v2';
+    const COLORS = [
+      '#2BB3A3', '#E6A23C', '#4E8DEB', '#D96953', '#7BAE46', '#B66CCB',
+      '#35A7C9', '#D48A2F', '#6B86D6', '#CC5C8A', '#21A06E', '#A77A42'
+    ];
+
+    const state = {
+      sheetW: 240,
+      sheetH: 160,
+      kerf: 3,
+      cuts: []
+    };
+
+    let cutId = 1;
+    let lastPack = null;
+
+    const els = {
+      sheetW: document.getElementById('sheet-w'),
+      sheetH: document.getElementById('sheet-h'),
+      kerf: document.getElementById('kerf'),
+      cutsList: document.getElementById('cuts-list'),
+      error: document.getElementById('err-msg'),
+      resultArea: document.getElementById('result-area'),
+      metrics: document.getElementById('metrics'),
+      advice: document.getElementById('advice-box'),
+      canvasWrap: document.getElementById('canvas-wrap'),
+      canvas: document.getElementById('cv'),
+      legend: document.getElementById('legend'),
+      exportBtn: document.getElementById('export-btn')
+    };
+
+    document.getElementById('add-btn').addEventListener('click', () => addCut());
+    document.getElementById('calc-btn').addEventListener('click', calculate);
+    document.getElementById('clear-btn').addEventListener('click', clearAll);
+    document.getElementById('sample-btn').addEventListener('click', loadSample);
+    els.exportBtn.addEventListener('click', exportPng);
+    [els.sheetW, els.sheetH, els.kerf].forEach(input => {
+      input.addEventListener('input', () => {
+        syncSheetState();
+        saveState();
+      });
+    });
+
+    window.addEventListener('resize', () => {
+      if (lastPack) drawCanvas(lastPack.placed, lastPack.sheetW, lastPack.sheetH);
+    });
+
+    init();
+
+    function init() {
+      if (!loadState()) {
+        loadSample(false);
+      }
+      renderCuts();
+    }
+
+    function syncSheetState() {
+      state.sheetW = els.sheetW.value;
+      state.sheetH = els.sheetH.value;
+      state.kerf = els.kerf.value;
+    }
+
+    function hydrateSheetInputs() {
+      els.sheetW.value = state.sheetW;
+      els.sheetH.value = state.sheetH;
+      els.kerf.value = state.kerf;
+    }
+
+    function addCut(w = '', h = '', qty = 1) {
+      state.cuts.push({ id: cutId++, w, h, qty });
+      renderCuts();
+      saveState();
+    }
+
+    function duplicateCut(id) {
+      const source = state.cuts.find(cut => cut.id === id);
+      if (!source) return;
+      state.cuts.push({ ...source, id: cutId++ });
+      renderCuts();
+      saveState();
+    }
+
+    function removeCut(id) {
+      state.cuts = state.cuts.filter(cut => cut.id !== id);
+      renderCuts();
+      saveState();
+    }
+
+    function updateCut(id, field, value) {
+      const cut = state.cuts.find(item => item.id === id);
+      if (!cut) return;
+      cut[field] = value;
+      saveState();
+    }
+
+    function renderCuts() {
+      els.cutsList.innerHTML = '';
+      if (state.cuts.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'empty-state';
+        empty.textContent = 'Sin piezas registradas';
+        els.cutsList.appendChild(empty);
+        return;
+      }
+
+      state.cuts.forEach((cut, index) => {
+        const row = document.createElement('div');
+        row.className = 'cut-item';
+        row.innerHTML = `
+          <span class="cut-index">${index + 1}</span>
+          <div class="cut-field">
+            <label for="cut-w-${cut.id}">Ancho</label>
+            <input id="cut-w-${cut.id}" type="number" min="1" step="0.1" inputmode="decimal" value="${escapeAttr(cut.w)}">
+          </div>
+          <div class="cut-field">
+            <label for="cut-h-${cut.id}">Alto</label>
+            <input id="cut-h-${cut.id}" type="number" min="1" step="0.1" inputmode="decimal" value="${escapeAttr(cut.h)}">
+          </div>
+          <div class="cut-field qty">
+            <label for="cut-q-${cut.id}">Cant.</label>
+            <input id="cut-q-${cut.id}" type="number" min="1" max="999" step="1" inputmode="numeric" value="${escapeAttr(cut.qty)}">
+          </div>
+          <button class="icon-btn" type="button" title="Duplicar pieza" aria-label="Duplicar pieza">+</button>
+          <button class="icon-btn danger" type="button" title="Eliminar pieza" aria-label="Eliminar pieza">x</button>
+        `;
+
+        const [wInput, hInput, qInput] = row.querySelectorAll('input');
+        wInput.addEventListener('input', event => updateCut(cut.id, 'w', event.target.value));
+        hInput.addEventListener('input', event => updateCut(cut.id, 'h', event.target.value));
+        qInput.addEventListener('input', event => updateCut(cut.id, 'qty', event.target.value));
+        row.querySelectorAll('button')[0].addEventListener('click', () => duplicateCut(cut.id));
+        row.querySelectorAll('button')[1].addEventListener('click', () => removeCut(cut.id));
+        els.cutsList.appendChild(row);
+      });
+    }
+
+    function calculate() {
+      hideError();
+      syncSheetState();
+
+      const validation = buildPieces();
+      if (validation.error) {
+        showError(validation.error);
+        return;
+      }
+
+      const { sheetW, sheetH, kerfCm, pieces } = validation;
+      const pack = findBestPack(pieces, sheetW, sheetH, kerfCm);
+
+      if (!pack || pack.placed.length < pieces.length) {
+        const placed = pack ? pack.placed.length : 0;
+        showError(`No fue posible acomodar todo el pedido. Mejor intento: ${placed} de ${pieces.length} piezas colocadas.`);
+        return;
+      }
+
+      lastPack = { ...pack, sheetW, sheetH };
+      renderResult(lastPack, sheetW, sheetH);
+      saveState();
+    }
+
+    function buildPieces() {
+      const sheetW = parsePositive(els.sheetW.value);
+      const sheetH = parsePositive(els.sheetH.value);
+      const kerfMm = parseNonNegative(els.kerf.value);
+
+      if (!sheetW || !sheetH) {
+        return { error: 'Ingresa dimensiones validas para la lamina.' };
+      }
+      if (kerfMm === null || kerfMm > 20) {
+        return { error: 'El kerf debe estar entre 0 y 20 mm.' };
+      }
+      if (state.cuts.length === 0) {
+        return { error: 'Agrega al menos una pieza para cortar.' };
+      }
+
+      const pieces = [];
+      const kerfCm = kerfMm / 10;
+
+      for (const [index, cut] of state.cuts.entries()) {
+        const w = parsePositive(cut.w);
+        const h = parsePositive(cut.h);
+        const qty = parseInteger(cut.qty);
+        const label = `Pieza ${index + 1}`;
+
+        if (!w || !h) {
+          return { error: `${label}: revisa ancho y alto.` };
+        }
+        if (!qty || qty < 1 || qty > 999) {
+          return { error: `${label}: la cantidad debe ser un numero entero entre 1 y 999.` };
+        }
+        if (!fitsAnyOrientation(w, h, sheetW, sheetH)) {
+          return { error: `${label}: ${formatCm(w)} x ${formatCm(h)} cm no cabe en la lamina ${formatCm(sheetW)} x ${formatCm(sheetH)} cm.` };
+        }
+
+        for (let i = 0; i < qty; i++) {
+          pieces.push({
+            id: `${cut.id}-${i}`,
+            groupId: cut.id,
+            origW: w,
+            origH: h,
+            w,
+            h,
+            area: w * h
+          });
+        }
+      }
+
+      if (pieces.reduce((sum, piece) => sum + piece.area, 0) > sheetW * sheetH + 0.001) {
+        return { error: 'El area total de las piezas supera el area de la lamina.' };
+      }
+
+      return { sheetW, sheetH, kerfCm, pieces };
+    }
+
+    function findBestPack(pieces, sheetW, sheetH, kerfCm) {
+      const sorters = [
+        (a, b) => b.area - a.area,
+        (a, b) => Math.max(b.w, b.h) - Math.max(a.w, a.h),
+        (a, b) => b.w - a.w || b.h - a.h,
+        (a, b) => b.h - a.h || b.w - a.w,
+        (a, b) => Math.abs(b.w - b.h) - Math.abs(a.w - a.h)
+      ];
+
+      let best = null;
+      for (const sorter of sorters) {
+        const ordered = [...pieces].sort(sorter);
+        const pack = guillotinePack(ordered, sheetW, sheetH, kerfCm);
+        best = chooseBetterPack(best, pack, pieces.length, sheetW, sheetH);
+        if (best && best.placed.length === pieces.length && best.freeArea < kerfCm) break;
+      }
+      return best;
+    }
+
+    function chooseBetterPack(current, candidate, totalPieces, sheetW, sheetH) {
+      if (!candidate) return current;
+      candidate.freeArea = calculateFreeArea(candidate.freeRects);
+      candidate.largestFree = candidate.freeRects.reduce((max, r) => Math.max(max, r.w * r.h), 0);
+      candidate.score = candidate.placed.length * sheetW * sheetH + candidate.largestFree - candidate.freeRects.length * 0.01;
+
+      if (!current) return candidate;
+      if (candidate.placed.length !== current.placed.length) {
+        return candidate.placed.length > current.placed.length ? candidate : current;
+      }
+      if (candidate.placed.length === totalPieces && candidate.largestFree !== current.largestFree) {
+        return candidate.largestFree > current.largestFree ? candidate : current;
+      }
+      return candidate.score > current.score ? candidate : current;
+    }
+
+    function guillotinePack(pieces, sheetW, sheetH, kerfCm) {
+      const freeRects = [{ x: 0, y: 0, w: sheetW, h: sheetH }];
+      const placed = [];
+      const colorMap = new Map();
+      let colorIndex = 0;
+
+      for (const piece of pieces) {
+        let best = null;
+
+        for (let i = 0; i < freeRects.length; i++) {
+          const rect = freeRects[i];
+          for (const rotated of [false, true]) {
+            const w = rotated ? piece.h : piece.w;
+            const h = rotated ? piece.w : piece.h;
+            if (w <= rect.w + 0.001 && h <= rect.h + 0.001) {
+              const shortSide = Math.min(rect.w - w, rect.h - h);
+              const longSide = Math.max(rect.w - w, rect.h - h);
+              const score = shortSide * 100000 + longSide;
+              if (!best || score < best.score) {
+                best = { rectIndex: i, rotated, w, h, score };
+              }
+            }
+          }
+        }
+
+        if (!best) break;
+
+        const rect = freeRects[best.rectIndex];
+        const key = `${piece.origW}x${piece.origH}`;
+        if (!colorMap.has(key)) {
+          colorMap.set(key, COLORS[colorIndex++ % COLORS.length]);
+        }
+
+        placed.push({
+          x: rect.x,
+          y: rect.y,
+          w: best.w,
+          h: best.h,
+          origW: piece.origW,
+          origH: piece.origH,
+          rotated: best.rotated,
+          color: colorMap.get(key)
+        });
+
+        const splitByWidth = rect.w - best.w > rect.h - best.h;
+        const rightW = rect.w - best.w - kerfCm;
+        const bottomH = rect.h - best.h - kerfCm;
+        const newRects = [];
+
+        if (splitByWidth) {
+          if (rightW > 0.001) {
+            newRects.push({ x: rect.x + best.w + kerfCm, y: rect.y, w: rightW, h: rect.h });
+          }
+          if (bottomH > 0.001) {
+            newRects.push({ x: rect.x, y: rect.y + best.h + kerfCm, w: best.w, h: bottomH });
+          }
+        } else {
+          if (bottomH > 0.001) {
+            newRects.push({ x: rect.x, y: rect.y + best.h + kerfCm, w: rect.w, h: bottomH });
+          }
+          if (rightW > 0.001) {
+            newRects.push({ x: rect.x + best.w + kerfCm, y: rect.y, w: rightW, h: best.h });
+          }
+        }
+
+        freeRects.splice(best.rectIndex, 1, ...newRects);
+        pruneFreeRects(freeRects);
+      }
+
+      return { placed, freeRects };
+    }
+
+    function pruneFreeRects(rects) {
+      for (let i = rects.length - 1; i >= 0; i--) {
+        const a = rects[i];
+        if (a.w <= 0.001 || a.h <= 0.001) {
+          rects.splice(i, 1);
+          continue;
+        }
+        for (let j = rects.length - 1; j >= 0; j--) {
+          if (i === j) continue;
+          const b = rects[j];
+          if (isContainedIn(a, b)) {
+            rects.splice(i, 1);
+            break;
+          }
+        }
+      }
+    }
+
+    function renderResult(pack, sheetW, sheetH) {
+      const totalSheet = sheetW * sheetH;
+      const usedArea = pack.placed.reduce((sum, piece) => sum + piece.origW * piece.origH, 0);
+      const usedPct = usedArea / totalSheet * 100;
+      const wasteArea = Math.max(0, totalSheet - usedArea);
+      const wastePct = Math.max(0, 100 - usedPct);
+      const efficiencyClass = usedPct >= 85 ? 'good' : usedPct >= 65 ? 'warn' : 'bad';
+
+      els.resultArea.classList.add('visible');
+      els.exportBtn.disabled = false;
+
+      els.metrics.innerHTML = `
+        <div class="metric ${efficiencyClass}">
+          <div class="value">${usedPct.toFixed(1)}%</div>
+          <div class="label">Aprovechamiento</div>
+        </div>
+        <div class="metric">
+          <div class="value">${wastePct.toFixed(1)}%</div>
+          <div class="label">Desperdicio</div>
+        </div>
+        <div class="metric">
+          <div class="value">${pack.placed.length}</div>
+          <div class="label">Piezas colocadas</div>
+        </div>
+        <div class="metric">
+          <div class="value">${formatArea(wasteArea)}</div>
+          <div class="label">Sobrante</div>
+        </div>
+      `;
+
+      const largestFree = pack.largestFree || 0;
+      const advice = buildAdvice(usedPct, wastePct, largestFree);
+      els.advice.className = `advice ${efficiencyClass}`;
+      els.advice.textContent = advice;
+
+      drawCanvas(pack.placed, sheetW, sheetH);
+      renderLegend(pack.placed);
+    }
+
+    function buildAdvice(usedPct, wastePct, largestFree) {
+      const freeText = largestFree > 0 ? ` Sobrante continuo mayor: ${formatArea(largestFree)}.` : '';
+      if (usedPct >= 85) {
+        return `Corte eficiente: se aprovecha el ${usedPct.toFixed(1)}% de la lamina y queda ${wastePct.toFixed(1)}% de desperdicio.${freeText}`;
+      }
+      if (usedPct >= 65) {
+        return `Corte aceptable: se aprovecha el ${usedPct.toFixed(1)}%. Puedes revisar si una lamina mas pequena o piezas adicionales reducen el ${wastePct.toFixed(1)}% sobrante.${freeText}`;
+      }
+      return `Corte ineficiente: solo se aprovecha el ${usedPct.toFixed(1)}%. Conviene cambiar tamano de lamina, agrupar mas piezas o reservar el sobrante para otro pedido.${freeText}`;
+    }
+
+    function drawCanvas(placed, sheetW, sheetH) {
+      const cssWidth = Math.max(320, els.canvasWrap.clientWidth - 2);
+      const scale = Math.min(cssWidth / sheetW, 620 / sheetH);
+      const canvasW = Math.max(320, Math.round(sheetW * scale));
+      const canvasH = Math.max(180, Math.round(sheetH * scale));
+      const dpr = window.devicePixelRatio || 1;
+      const ctx = els.canvas.getContext('2d');
+      const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+      els.canvas.style.width = `${canvasW}px`;
+      els.canvas.style.height = `${canvasH}px`;
+      els.canvas.width = Math.round(canvasW * dpr);
+      els.canvas.height = Math.round(canvasH * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, canvasW, canvasH);
+
+      ctx.fillStyle = dark ? '#263437' : '#eef2f3';
+      ctx.fillRect(0, 0, canvasW, canvasH);
+      drawGrid(ctx, canvasW, canvasH);
+
+      ctx.strokeStyle = dark ? '#83949b' : '#9facb3';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(0.5, 0.5, canvasW - 1, canvasH - 1);
+
+      for (const piece of placed) {
+        const x = Math.round(piece.x * scale);
+        const y = Math.round(piece.y * scale);
+        const w = Math.max(1, Math.round(piece.w * scale));
+        const h = Math.max(1, Math.round(piece.h * scale));
+
+        ctx.fillStyle = `${piece.color}cc`;
+        ctx.fillRect(x, y, w, h);
+        ctx.strokeStyle = piece.color;
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(x + 0.5, y + 0.5, Math.max(0, w - 1), Math.max(0, h - 1));
+
+        const label = `${formatCm(piece.origW)}x${formatCm(piece.origH)}${piece.rotated ? ' R' : ''}`;
+        const fontSize = Math.max(9, Math.min(13, w / Math.max(5, label.length * 0.55), h * 0.34));
+        ctx.font = `700 ${fontSize}px ${getComputedStyle(document.body).fontFamily}`;
+        const textW = ctx.measureText(label).width;
+        if (textW + 9 < w && fontSize + 7 < h) {
+          const tx = x + w / 2;
+          const ty = y + h / 2;
+          ctx.fillStyle = dark ? 'rgba(16, 23, 25, 0.72)' : 'rgba(255, 255, 255, 0.82)';
+          ctx.fillRect(tx - textW / 2 - 4, ty - fontSize / 2 - 3, textW + 8, fontSize + 7);
+          ctx.fillStyle = dark ? '#edf3f4' : '#172025';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(label, tx, ty);
+        }
+      }
+    }
+
+    function drawGrid(ctx, width, height) {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(127, 145, 152, 0.16)';
+      ctx.lineWidth = 1;
+      for (let x = 40; x < width; x += 40) {
+        ctx.beginPath();
+        ctx.moveTo(x + 0.5, 0);
+        ctx.lineTo(x + 0.5, height);
+        ctx.stroke();
+      }
+      for (let y = 40; y < height; y += 40) {
+        ctx.beginPath();
+        ctx.moveTo(0, y + 0.5);
+        ctx.lineTo(width, y + 0.5);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function renderLegend(placed) {
+      const groups = new Map();
+      for (const piece of placed) {
+        const key = `${formatCm(piece.origW)} x ${formatCm(piece.origH)} cm`;
+        const entry = groups.get(key) || { color: piece.color, count: 0, rotated: false };
+        entry.count += 1;
+        entry.rotated = entry.rotated || piece.rotated;
+        groups.set(key, entry);
+      }
+
+      const items = [...groups.entries()].map(([label, item]) => `
+        <span class="legend-item">
+          <span class="legend-dot" style="background:${item.color}"></span>
+          ${label} (${item.count})${item.rotated ? ' rotada' : ''}
+        </span>
+      `);
+      items.push(`
+        <span class="legend-item">
+          <span class="legend-dot" style="background:rgba(127,145,152,0.18);border-color:rgba(127,145,152,0.42)"></span>
+          Sobrante
+        </span>
+      `);
+      els.legend.innerHTML = items.join('');
+    }
+
+    function clearAll() {
+      state.sheetW = 240;
+      state.sheetH = 160;
+      state.kerf = 3;
+      state.cuts = [];
+      hydrateSheetInputs();
+      renderCuts();
+      resetResult();
+      saveState();
+    }
+
+    function loadSample(shouldSave = true) {
+      state.sheetW = 240;
+      state.sheetH = 160;
+      state.kerf = 3;
+      state.cuts = [
+        { id: cutId++, w: 60, h: 40, qty: 2 },
+        { id: cutId++, w: 80, h: 60, qty: 1 },
+        { id: cutId++, w: 30, h: 30, qty: 3 },
+        { id: cutId++, w: 45, h: 35, qty: 2 }
+      ];
+      hydrateSheetInputs();
+      renderCuts();
+      resetResult();
+      if (shouldSave) saveState();
+    }
+
+    function resetResult(options = {}) {
+      lastPack = null;
+      els.resultArea.classList.remove('visible');
+      els.exportBtn.disabled = true;
+      if (!options.keepError) hideError();
+    }
+
+    function exportPng() {
+      if (!lastPack) return;
+      const link = document.createElement('a');
+      link.download = `optiglass-${new Date().toISOString().slice(0, 10)}.png`;
+      link.href = els.canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    function saveState() {
+      const snapshot = {
+        sheetW: els.sheetW.value,
+        sheetH: els.sheetH.value,
+        kerf: els.kerf.value,
+        cuts: state.cuts
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return false;
+        const saved = JSON.parse(raw);
+        if (!Array.isArray(saved.cuts)) return false;
+        state.sheetW = saved.sheetW ?? 240;
+        state.sheetH = saved.sheetH ?? 160;
+        state.kerf = saved.kerf ?? 3;
+        state.cuts = saved.cuts.map(cut => ({ ...cut, id: cutId++ }));
+        hydrateSheetInputs();
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    function showError(message) {
+      resetResult({ keepError: true });
+      els.error.textContent = message;
+      els.error.classList.add('visible');
+    }
+
+    function hideError() {
+      els.error.textContent = '';
+      els.error.classList.remove('visible');
+    }
+
+    function parsePositive(value) {
+      const number = Number.parseFloat(value);
+      return Number.isFinite(number) && number > 0 ? number : null;
+    }
+
+    function parseNonNegative(value) {
+      if (value === '') return null;
+      const number = Number.parseFloat(value);
+      return Number.isFinite(number) && number >= 0 ? number : null;
+    }
+
+    function parseInteger(value) {
+      const number = Number(value);
+      return Number.isInteger(number) ? number : null;
+    }
+
+    function fitsAnyOrientation(w, h, sheetW, sheetH) {
+      return (w <= sheetW && h <= sheetH) || (h <= sheetW && w <= sheetH);
+    }
+
+    function calculateFreeArea(rects) {
+      return rects.reduce((sum, rect) => sum + rect.w * rect.h, 0);
+    }
+
+    function isContainedIn(a, b) {
+      return a.x >= b.x - 0.001 &&
+        a.y >= b.y - 0.001 &&
+        a.x + a.w <= b.x + b.w + 0.001 &&
+        a.y + a.h <= b.y + b.h + 0.001;
+    }
+
+    function formatCm(value) {
+      return Number(value).toLocaleString('es-CO', { maximumFractionDigits: 1 });
+    }
+
+    function formatArea(value) {
+      if (value >= 10000) {
+        return `${(value / 10000).toLocaleString('es-CO', { maximumFractionDigits: 2 })} m2`;
+      }
+      return `${value.toLocaleString('es-CO', { maximumFractionDigits: 0 })} cm2`;
+    }
+
+    function escapeAttr(value) {
+      return String(value ?? '').replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;');
+    }
+  </script>
+</body>
+</html>
