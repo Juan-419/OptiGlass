@@ -65,7 +65,9 @@ http://127.0.0.1:5000
 
 ## Espesores
 
-El espesor ajusta el kerf minimo sugerido y cambia la recomendacion de corte:
+El espesor ajusta el kerf minimo sugerido y cambia la recomendacion de corte.
+
+El kerf (o rodaja) es el espacio que consume el disco o rueda de corte al pasar sobre el vidrio. Si no se tiene en cuenta, las piezas pueden salir ligeramente mas pequeñas de lo pedido y el error se acumula en cortes consecutivos.
 
 | Espesor | Uso | Kerf minimo |
 | --- | --- | --- |
@@ -85,6 +87,12 @@ El kerf se aplica como separacion entre cortes al dividir los rectangulos libres
 - Corte eficiente: aprovechamiento igual o superior al 85%.
 - Corte aceptable: aprovechamiento entre 65% y 84.9%.
 - Corte ineficiente: aprovechamiento inferior al 65%.
+
+## Mejoras incluidas en v1.3
+
+- Canvas de distribucion visual ocupa todo el ancho del panel.
+- Eliminado el fondo de patron en el area sobrante del plano de corte.
+- Version actualizada en el footer de la aplicacion.
 
 ## Mejoras incluidas en v1.2
 
