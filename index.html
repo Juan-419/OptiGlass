@@ -420,15 +420,12 @@
       overflow: auto;
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
-      background:
-        linear-gradient(45deg, color-mix(in srgb, var(--surface-2) 78%, transparent) 25%, transparent 25%),
-        linear-gradient(-45deg, color-mix(in srgb, var(--surface-2) 78%, transparent) 25%, transparent 25%);
-      background-size: 18px 18px;
+      background: var(--surface-2);
     }
 
     canvas {
       display: block;
-      max-width: 100%;
+      width: 100% !important;
       height: auto;
     }
 
@@ -1034,14 +1031,14 @@
 
     function drawCanvas(placed, sheetW, sheetH) {
       const cssWidth = Math.max(320, els.canvasWrap.clientWidth - 2);
-      const scale = Math.min(cssWidth / sheetW, 620 / sheetH);
-      const canvasW = Math.max(320, Math.round(sheetW * scale));
+      const scale = cssWidth / sheetW;
+      const canvasW = cssWidth;
       const canvasH = Math.max(180, Math.round(sheetH * scale));
       const dpr = window.devicePixelRatio || 1;
       const ctx = els.canvas.getContext('2d');
       const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-      els.canvas.style.width = `${canvasW}px`;
+      els.canvas.style.width = '';
       els.canvas.style.height = `${canvasH}px`;
       els.canvas.width = Math.round(canvasW * dpr);
       els.canvas.height = Math.round(canvasH * dpr);
