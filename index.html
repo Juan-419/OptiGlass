@@ -176,7 +176,8 @@
       font-weight: 650;
     }
 
-    input[type="number"] {
+    input[type="number"],
+    select {
       width: 100%;
       min-width: 0;
       height: 38px;
@@ -188,10 +189,31 @@
       transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
     }
 
-    input[type="number"]:focus {
+    select {
+      appearance: none;
+      background-image:
+        linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+        linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+      background-position:
+        calc(100% - 16px) 16px,
+        calc(100% - 11px) 16px;
+      background-repeat: no-repeat;
+      background-size: 5px 5px, 5px 5px;
+      padding-right: 34px;
+    }
+
+    input[type="number"]:focus,
+    select:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 3px var(--focus);
       background: var(--surface);
+    }
+
+    .field-hint {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      margin: 0;
     }
 
     .cuts-list {
@@ -510,15 +532,25 @@
           <div class="sheet-grid">
             <div class="field">
               <label for="sheet-w">Ancho (cm)</label>
-              <input type="number" id="sheet-w" value="240" min="1" step="0.1" inputmode="decimal">
+              <input type="number" id="sheet-w" value="250" min="1" step="0.1" inputmode="decimal">
             </div>
             <div class="field">
               <label for="sheet-h">Alto (cm)</label>
-              <input type="number" id="sheet-h" value="160" min="1" step="0.1" inputmode="decimal">
+              <input type="number" id="sheet-h" value="360" min="1" step="0.1" inputmode="decimal">
+            </div>
+            <div class="field full">
+              <label for="thickness">Espesor del vidrio</label>
+              <select id="thickness">
+                <option value="4">4 mm - Ventanas pequenas o claraboyas</option>
+                <option value="6" selected>6 mm - Ventanas de viviendas y mesas</option>
+                <option value="8">8 mm - Puertas de ducha</option>
+                <option value="10">10 mm o mas - Mamparas y divisiones</option>
+              </select>
+              <p class="field-hint" id="thickness-hint"></p>
             </div>
             <div class="field full">
               <label for="kerf">Margen de corte / kerf (mm)</label>
-              <input type="number" id="kerf" value="3" min="0" max="20" step="0.5" inputmode="decimal">
+              <input type="number" id="kerf" value="3" min="3" max="20" step="0.5" inputmode="decimal">
             </div>
           </div>
         </section>
@@ -549,19 +581,53 @@
       </section>
     </section>
 
-    <footer class="footer">OptiGlass - Optimizador de corte v1.1</footer>
+    <footer class="footer">OptiGlass - Optimizador de corte v1.2</footer>
   </main>
 
   <script>
-    const STORAGE_KEY = 'optiglass-state-v2';
+    const STORAGE_KEY = 'optiglass-state-v3';
+    const DEFAULT_SHEET_W = 250;
+    const DEFAULT_SHEET_H = 360;
+    const DEFAULT_THICKNESS = '6';
+    const THICKNESS_OPTIONS = [
+      {
+        value: '4',
+        label: '4 mm',
+        use: 'Para ventanas pequenas o claraboyas',
+        kerf: 2,
+        mode: 'Corte delicado con separacion ajustada.'
+      },
+      {
+        value: '6',
+        label: '6 mm',
+        use: 'Usado en ventanas de viviendas y mesas',
+        kerf: 3,
+        mode: 'Corte estandar para piezas de uso comun.'
+      },
+      {
+        value: '8',
+        label: '8 mm',
+        use: 'Ideal para puertas de ducha',
+        kerf: 4,
+        mode: 'Corte reforzado con mas separacion para manipular la pieza.'
+      },
+      {
+        value: '10',
+        label: '10 mm o mas',
+        use: 'Para mamparas y divisiones de oficina',
+        kerf: 5,
+        mode: 'Corte pesado con mayor separacion y cuidado de manipulacion.'
+      }
+    ];
     const COLORS = [
       '#2BB3A3', '#E6A23C', '#4E8DEB', '#D96953', '#7BAE46', '#B66CCB',
       '#35A7C9', '#D48A2F', '#6B86D6', '#CC5C8A', '#21A06E', '#A77A42'
     ];
 
     const state = {
-      sheetW: 240,
-      sheetH: 160,
+      sheetW: DEFAULT_SHEET_W,
+      sheetH: DEFAULT_SHEET_H,
+      thickness: DEFAULT_THICKNESS,
       kerf: 3,
       cuts: []
     };
@@ -572,6 +638,8 @@
     const els = {
       sheetW: document.getElementById('sheet-w'),
       sheetH: document.getElementById('sheet-h'),
+      thickness: document.getElementById('thickness'),
+      thicknessHint: document.getElementById('thickness-hint'),
       kerf: document.getElementById('kerf'),
       cutsList: document.getElementById('cuts-list'),
       error: document.getElementById('err-msg'),
@@ -589,6 +657,16 @@
     document.getElementById('clear-btn').addEventListener('click', clearAll);
     document.getElementById('sample-btn').addEventListener('click', loadSample);
     els.exportBtn.addEventListener('click', exportPng);
+    els.thickness.addEventListener('change', () => {
+      const option = getThicknessOption();
+      state.thickness = option.value;
+      els.kerf.min = option.kerf;
+      els.kerf.value = option.kerf;
+      state.kerf = option.kerf;
+      updateThicknessHint();
+      resetResult();
+      saveState();
+    });
     [els.sheetW, els.sheetH, els.kerf].forEach(input => {
       input.addEventListener('input', () => {
         syncSheetState();
@@ -612,13 +690,16 @@
     function syncSheetState() {
       state.sheetW = els.sheetW.value;
       state.sheetH = els.sheetH.value;
+      state.thickness = els.thickness.value;
       state.kerf = els.kerf.value;
     }
 
     function hydrateSheetInputs() {
       els.sheetW.value = state.sheetW;
       els.sheetH.value = state.sheetH;
+      els.thickness.value = state.thickness;
       els.kerf.value = state.kerf;
+      updateThicknessHint();
     }
 
     function addCut(w = '', h = '', qty = 1) {
@@ -699,7 +780,7 @@
         return;
       }
 
-      const { sheetW, sheetH, kerfCm, pieces } = validation;
+      const { sheetW, sheetH, kerfMm, kerfCm, thickness, pieces } = validation;
       const pack = findBestPack(pieces, sheetW, sheetH, kerfCm);
 
       if (!pack || pack.placed.length < pieces.length) {
@@ -708,7 +789,7 @@
         return;
       }
 
-      lastPack = { ...pack, sheetW, sheetH };
+      lastPack = { ...pack, sheetW, sheetH, kerfMm, thickness };
       renderResult(lastPack, sheetW, sheetH);
       saveState();
     }
@@ -717,12 +798,16 @@
       const sheetW = parsePositive(els.sheetW.value);
       const sheetH = parsePositive(els.sheetH.value);
       const kerfMm = parseNonNegative(els.kerf.value);
+      const thickness = getThicknessOption();
 
       if (!sheetW || !sheetH) {
         return { error: 'Ingresa dimensiones validas para la lamina.' };
       }
       if (kerfMm === null || kerfMm > 20) {
         return { error: 'El kerf debe estar entre 0 y 20 mm.' };
+      }
+      if (kerfMm < thickness.kerf) {
+        return { error: `Para vidrio de ${thickness.label}, usa un kerf minimo de ${formatMm(thickness.kerf)} mm.` };
       }
       if (state.cuts.length === 0) {
         return { error: 'Agrega al menos una pieza para cortar.' };
@@ -764,7 +849,7 @@
         return { error: 'El area total de las piezas supera el area de la lamina.' };
       }
 
-      return { sheetW, sheetH, kerfCm, pieces };
+      return { sheetW, sheetH, kerfMm, kerfCm, thickness, pieces };
     }
 
     function findBestPack(pieces, sheetW, sheetH, kerfCm) {
@@ -923,7 +1008,7 @@
         </div>
       `;
 
-      const advice = buildAdvice(usedPct, wastePct, pack.largestFreeRect);
+      const advice = buildAdvice(usedPct, wastePct, pack.largestFreeRect, pack.thickness, pack.kerfMm);
       els.advice.className = `advice ${efficiencyClass}`;
       els.advice.textContent = advice;
 
@@ -931,17 +1016,20 @@
       renderLegend(pack.placed);
     }
 
-    function buildAdvice(usedPct, wastePct, largestFreeRect) {
+    function buildAdvice(usedPct, wastePct, largestFreeRect, thickness, kerfMm) {
       const freeText = largestFreeRect
         ? ` Mayor sobrante: ${formatRect(largestFreeRect)} (${formatArea(largestFreeRect.w * largestFreeRect.h)}).`
         : '';
+      const thicknessText = thickness
+        ? ` Espesor: ${thickness.label}. ${thickness.use}. ${thickness.mode} Kerf aplicado: ${formatMm(kerfMm)} mm.`
+        : '';
       if (usedPct >= 85) {
-        return `Corte eficiente: se aprovecha el ${usedPct.toFixed(1)}% de la lamina y queda ${wastePct.toFixed(1)}% de desperdicio.${freeText}`;
+        return `Corte eficiente: se aprovecha el ${usedPct.toFixed(1)}% de la lamina y queda ${wastePct.toFixed(1)}% de desperdicio.${freeText}${thicknessText}`;
       }
       if (usedPct >= 65) {
-        return `Corte aceptable: se aprovecha el ${usedPct.toFixed(1)}%. Puedes revisar si una lamina mas pequena o piezas adicionales reducen el ${wastePct.toFixed(1)}% sobrante.${freeText}`;
+        return `Corte aceptable: se aprovecha el ${usedPct.toFixed(1)}%. Puedes revisar si una lamina mas pequena o piezas adicionales reducen el ${wastePct.toFixed(1)}% sobrante.${freeText}${thicknessText}`;
       }
-      return `Corte ineficiente: solo se aprovecha el ${usedPct.toFixed(1)}%. Conviene cambiar tamano de lamina, agrupar mas piezas o reservar el sobrante para otro pedido.${freeText}`;
+      return `Corte ineficiente: solo se aprovecha el ${usedPct.toFixed(1)}%. Conviene cambiar tamano de lamina, agrupar mas piezas o reservar el sobrante para otro pedido.${freeText}${thicknessText}`;
     }
 
     function drawCanvas(placed, sheetW, sheetH) {
@@ -1042,9 +1130,11 @@
     }
 
     function clearAll() {
-      state.sheetW = 240;
-      state.sheetH = 160;
-      state.kerf = 3;
+      const thickness = getThicknessOption(DEFAULT_THICKNESS);
+      state.sheetW = DEFAULT_SHEET_W;
+      state.sheetH = DEFAULT_SHEET_H;
+      state.thickness = thickness.value;
+      state.kerf = thickness.kerf;
       state.cuts = [];
       hydrateSheetInputs();
       renderCuts();
@@ -1053,9 +1143,11 @@
     }
 
     function loadSample(shouldSave = true) {
-      state.sheetW = 240;
-      state.sheetH = 160;
-      state.kerf = 3;
+      const thickness = getThicknessOption(DEFAULT_THICKNESS);
+      state.sheetW = DEFAULT_SHEET_W;
+      state.sheetH = DEFAULT_SHEET_H;
+      state.thickness = thickness.value;
+      state.kerf = thickness.kerf;
       state.cuts = [
         { id: cutId++, w: 60, h: 40, qty: 2 },
         { id: cutId++, w: 80, h: 60, qty: 1 },
@@ -1087,6 +1179,7 @@
       const snapshot = {
         sheetW: els.sheetW.value,
         sheetH: els.sheetH.value,
+        thickness: els.thickness.value,
         kerf: els.kerf.value,
         cuts: state.cuts
       };
@@ -1099,9 +1192,11 @@
         if (!raw) return false;
         const saved = JSON.parse(raw);
         if (!Array.isArray(saved.cuts)) return false;
-        state.sheetW = saved.sheetW ?? 240;
-        state.sheetH = saved.sheetH ?? 160;
-        state.kerf = saved.kerf ?? 3;
+        const thickness = getThicknessOption(saved.thickness ?? DEFAULT_THICKNESS);
+        state.sheetW = saved.sheetW ?? DEFAULT_SHEET_W;
+        state.sheetH = saved.sheetH ?? DEFAULT_SHEET_H;
+        state.thickness = thickness.value;
+        state.kerf = saved.kerf ?? thickness.kerf;
         state.cuts = saved.cuts.map(cut => ({ ...cut, id: cutId++ }));
         hydrateSheetInputs();
         return true;
@@ -1141,6 +1236,17 @@
       return (w <= sheetW && h <= sheetH) || (h <= sheetW && w <= sheetH);
     }
 
+    function getThicknessOption(value = els.thickness.value) {
+      return THICKNESS_OPTIONS.find(option => option.value === value) ||
+        THICKNESS_OPTIONS.find(option => option.value === DEFAULT_THICKNESS);
+    }
+
+    function updateThicknessHint() {
+      const option = getThicknessOption();
+      els.kerf.min = option.kerf;
+      els.thicknessHint.textContent = `${option.use}. ${option.mode} Kerf minimo sugerido: ${formatMm(option.kerf)} mm.`;
+    }
+
     function calculateFreeArea(rects) {
       return rects.reduce((sum, rect) => sum + rect.w * rect.h, 0);
     }
@@ -1162,6 +1268,10 @@
     }
 
     function formatCm(value) {
+      return Number(value).toLocaleString('es-CO', { maximumFractionDigits: 1 });
+    }
+
+    function formatMm(value) {
       return Number(value).toLocaleString('es-CO', { maximumFractionDigits: 1 });
     }
 

@@ -4,7 +4,9 @@ OptiGlass es una aplicacion web para optimizar cortes rectangulares sobre una la
 
 ## Caracteristicas
 
-- Configuracion de ancho, alto y margen de corte de la lamina.
+- Configuracion de ancho, alto, espesor y margen de corte de la lamina.
+- Tamano inicial de lamina de 250 cm x 360 cm.
+- Espesores de vidrio por uso: 4 mm, 6 mm, 8 mm y 10 mm o mas.
 - Registro de multiples piezas con cantidad, duplicado y eliminacion.
 - Validaciones para dimensiones, cantidades y piezas que no caben.
 - Rotacion automatica de piezas cuando mejora el acomodo.
@@ -54,11 +56,23 @@ http://127.0.0.1:5000
 ## Como usar
 
 1. Ingresa las dimensiones de la lamina.
-2. Ajusta el margen de corte o kerf en milimetros.
-3. Agrega las piezas con ancho, alto y cantidad.
-4. Haz clic en `Calcular corte optimo`.
-5. Revisa las metricas, el plano de corte y la leyenda.
-6. Usa `Exportar PNG` para guardar el plano.
+2. Elige el espesor del vidrio.
+3. Ajusta el margen de corte o kerf en milimetros si necesitas cambiar el sugerido.
+4. Agrega las piezas con ancho, alto y cantidad.
+5. Haz clic en `Calcular corte optimo`.
+6. Revisa las metricas, el plano de corte y la leyenda.
+7. Usa `Exportar PNG` para guardar el plano.
+
+## Espesores
+
+El espesor ajusta el kerf minimo sugerido y cambia la recomendacion de corte:
+
+| Espesor | Uso | Kerf minimo |
+| --- | --- | --- |
+| 4 mm | Ventanas pequenas o claraboyas | 2 mm |
+| 6 mm | Ventanas de viviendas y mesas | 3 mm |
+| 8 mm | Puertas de ducha | 4 mm |
+| 10 mm o mas | Mamparas y divisiones de oficina | 5 mm |
 
 ## Algoritmo
 
@@ -71,6 +85,13 @@ El kerf se aplica como separacion entre cortes al dividir los rectangulos libres
 - Corte eficiente: aprovechamiento igual o superior al 85%.
 - Corte aceptable: aprovechamiento entre 65% y 84.9%.
 - Corte ineficiente: aprovechamiento inferior al 65%.
+
+## Mejoras incluidas en v1.2
+
+- Selector de espesor con usos recomendados.
+- Ajuste automatico del kerf minimo segun espesor.
+- Tamano inicial actualizado a 250 cm x 360 cm.
+- Visualizacion de sobrante total y mayor sobrante reutilizable.
 
 ## Mejoras incluidas en v1.1
 
