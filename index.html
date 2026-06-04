@@ -789,7 +789,8 @@
     function chooseBetterPack(current, candidate, totalPieces, sheetW, sheetH) {
       if (!candidate) return current;
       candidate.freeArea = calculateFreeArea(candidate.freeRects);
-      candidate.largestFree = candidate.freeRects.reduce((max, r) => Math.max(max, r.w * r.h), 0);
+      candidate.largestFreeRect = getLargestFreeRect(candidate.freeRects);
+      candidate.largestFree = candidate.largestFreeRect ? candidate.largestFreeRect.w * candidate.largestFreeRect.h : 0;
       candidate.score = candidate.placed.length * sheetW * sheetH + candidate.largestFree - candidate.freeRects.length * 0.01;
 
       if (!current) return candidate;
@@ -918,12 +919,11 @@
         </div>
         <div class="metric">
           <div class="value">${formatArea(wasteArea)}</div>
-          <div class="label">Sobrante</div>
+          <div class="label">Sobrante total</div>
         </div>
       `;
 
-      const largestFree = pack.largestFree || 0;
-      const advice = buildAdvice(usedPct, wastePct, largestFree);
+      const advice = buildAdvice(usedPct, wastePct, pack.largestFreeRect);
       els.advice.className = `advice ${efficiencyClass}`;
       els.advice.textContent = advice;
 
@@ -931,8 +931,10 @@
       renderLegend(pack.placed);
     }
 
-    function buildAdvice(usedPct, wastePct, largestFree) {
-      const freeText = largestFree > 0 ? ` Sobrante continuo mayor: ${formatArea(largestFree)}.` : '';
+    function buildAdvice(usedPct, wastePct, largestFreeRect) {
+      const freeText = largestFreeRect
+        ? ` Mayor sobrante: ${formatRect(largestFreeRect)} (${formatArea(largestFreeRect.w * largestFreeRect.h)}).`
+        : '';
       if (usedPct >= 85) {
         return `Corte eficiente: se aprovecha el ${usedPct.toFixed(1)}% de la lamina y queda ${wastePct.toFixed(1)}% de desperdicio.${freeText}`;
       }
@@ -1143,6 +1145,15 @@
       return rects.reduce((sum, rect) => sum + rect.w * rect.h, 0);
     }
 
+    function getLargestFreeRect(rects) {
+      return rects.reduce((best, rect) => {
+        if (!best || rect.w * rect.h > best.w * best.h) {
+          return { ...rect };
+        }
+        return best;
+      }, null);
+    }
+
     function isContainedIn(a, b) {
       return a.x >= b.x - 0.001 &&
         a.y >= b.y - 0.001 &&
@@ -1159,6 +1170,10 @@
         return `${(value / 10000).toLocaleString('es-CO', { maximumFractionDigits: 2 })} m2`;
       }
       return `${value.toLocaleString('es-CO', { maximumFractionDigits: 0 })} cm2`;
+    }
+
+    function formatRect(rect) {
+      return `${formatCm(rect.w)} x ${formatCm(rect.h)} cm`;
     }
 
     function escapeAttr(value) {
