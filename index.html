@@ -504,7 +504,138 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
-  </style>
+
+    /* === NUEVOS ESTILOS v1.4 ===
+    .multi-sheets-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 10px 18px;
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .sheet-tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .sheet-tab {
+      height: 28px;
+      padding: 0 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .sheet-tab.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .piece-list-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .piece-list-table th {
+      text-align: left;
+      padding: 6px 10px;
+      color: var(--muted);
+      font-weight: 500;
+      border-bottom: 1px solid var(--border);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .piece-list-table td {
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+    .piece-list-table tr:last-child td { border-bottom: none; }
+    .piece-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .cost-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 18px;
+      font-size: 13px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .cost-row strong { color: var(--text); font-weight: 600; }
+    .cost-block {
+      background: var(--surface-2);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      margin: 0 18px 12px;
+    }
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .modal {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      width: min(560px, 100%);
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow);
+    }
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--surface);
+    }
+    .history-item {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    .history-item:hover { background: var(--surface-2); }
+    .history-item:last-child { border-bottom: none; }
+    .history-item-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .history-client { font-weight: 500; font-size: 14px; color: var(--text); }
+    .history-date { font-size: 11px; color: var(--muted); }
+    .history-meta { font-size: 12px; color: var(--muted); }
+    .history-empty { padding: 32px 18px; text-align: center; font-size: 13px; color: var(--muted); }
+    .history-actions { display: flex; gap: 8px; padding: 12px 18px; border-top: 1px solid var(--border); }
+    </style>
 </head>
 <body>
   <main class="app">
@@ -514,14 +645,34 @@
         <p class="subtitle">Optimizador de cortes rectangulares para laminas de vidrio.</p>
       </div>
       <div class="toolbar" aria-label="Acciones de la aplicacion">
-        <button class="btn subtle" id="sample-btn" type="button" title="Cargar ejemplo">Ejemplo</button>
-        <button class="btn subtle" id="clear-btn" type="button" title="Limpiar formulario">Limpiar</button>
-        <button class="btn" id="export-btn" type="button" title="Exportar plano como PNG" disabled>Exportar PNG</button>
+        <button class="btn subtle" id="sample-btn" type="button">Ejemplo</button>
+        <button class="btn subtle" id="clear-btn" type="button">Limpiar</button>
+        <button class="btn subtle" id="history-btn" type="button">Historial</button>
+        <button class="btn" id="export-btn" type="button" disabled>Exportar PDF</button>
       </div>
     </header>
 
     <section class="layout">
       <div class="stack">
+
+        <!-- Cliente -->
+        <section class="panel" aria-labelledby="client-title">
+          <div class="panel-head">
+            <h2 class="panel-title" id="client-title">Cliente</h2>
+          </div>
+          <div class="sheet-grid">
+            <div class="field full">
+              <label for="client-name">Nombre del cliente</label>
+              <input type="text" id="client-name" placeholder="ej. Juan Pérez" autocomplete="off">
+            </div>
+            <div class="field full">
+              <label for="client-notes">Notas del pedido (opcional)</label>
+              <input type="text" id="client-notes" placeholder="ej. Medidas exactas, urgente..." autocomplete="off">
+            </div>
+          </div>
+        </section>
+
+        <!-- Lamina -->
         <section class="panel" aria-labelledby="sheet-title">
           <div class="panel-head">
             <h2 class="panel-title" id="sheet-title">Lamina disponible</h2>
@@ -549,13 +700,19 @@
               <label for="kerf">Margen de corte / kerf (mm)</label>
               <input type="number" id="kerf" value="3" min="3" max="20" step="0.5" inputmode="decimal">
             </div>
+            <div class="field full">
+              <label for="price-m2">Precio por m² (opcional)</label>
+              <input type="number" id="price-m2" value="" min="0" step="100" inputmode="decimal" placeholder="ej. 85000">
+              <p class="field-hint">Si ingresas el precio, se calculara el costo del pedido y del desperdicio.</p>
+            </div>
           </div>
         </section>
 
+        <!-- Piezas -->
         <section class="panel" aria-labelledby="pieces-title">
           <div class="panel-head">
             <h2 class="panel-title" id="pieces-title">Piezas</h2>
-            <button class="btn" id="add-btn" type="button" title="Agregar pieza">+ Agregar</button>
+            <button class="btn" id="add-btn" type="button">+ Agregar</button>
           </div>
           <div class="cuts-list" id="cuts-list"></div>
           <p class="error" id="err-msg" role="alert"></p>
@@ -563,97 +720,108 @@
         </section>
       </div>
 
+      <!-- Resultado -->
       <section class="result-panel" id="result-area" aria-live="polite">
         <div class="metrics" id="metrics"></div>
         <p class="advice" id="advice-box"></p>
+
+        <!-- Multiples laminas -->
+        <div id="multi-sheets-area" style="display:none">
+          <div class="multi-sheets-head">
+            <span id="multi-sheets-label"></span>
+            <div class="sheet-tabs" id="sheet-tabs"></div>
+          </div>
+        </div>
+
         <div class="canvas-section">
           <div class="canvas-head">
             <h2 class="panel-title">Distribucion visual</h2>
+            <span id="sheet-indicator" style="font-size:12px;color:var(--muted)"></span>
           </div>
           <div class="canvas-wrap" id="canvas-wrap">
             <canvas id="cv" width="860" height="560"></canvas>
           </div>
           <div class="legend" id="legend"></div>
         </div>
+
+        <!-- Numeracion de piezas -->
+        <div class="canvas-section" id="piece-list-area" style="display:none">
+          <h2 class="panel-title" style="margin-bottom:10px">Orden de corte</h2>
+          <div id="piece-list"></div>
+        </div>
       </section>
     </section>
 
-    <footer class="footer">OptiGlass - Optimizador de corte v1.3</footer>
+    <footer class="footer">OptiGlass - Optimizador de corte v1.4</footer>
   </main>
 
+  <!-- Modal historial -->
+  <div class="modal-overlay" id="history-modal" style="display:none">
+    <div class="modal">
+      <div class="modal-head">
+        <h2 class="panel-title">Historial de pedidos</h2>
+        <button class="btn subtle" id="history-close">Cerrar</button>
+      </div>
+      <div id="history-list"></div>
+    </div>
+  </div>
   <script>
-    const STORAGE_KEY = 'optiglass-state-v3';
+    const STORAGE_KEY = 'optiglass-state-v4';
+    const HISTORY_KEY = 'optiglass-history-v1';
     const DEFAULT_SHEET_W = 250;
     const DEFAULT_SHEET_H = 360;
     const DEFAULT_THICKNESS = '6';
     const THICKNESS_OPTIONS = [
-      {
-        value: '4',
-        label: '4 mm',
-        use: 'Para ventanas pequenas o claraboyas',
-        kerf: 2,
-        mode: 'Corte delicado con separacion ajustada.'
-      },
-      {
-        value: '6',
-        label: '6 mm',
-        use: 'Usado en ventanas de viviendas y mesas',
-        kerf: 3,
-        mode: 'Corte estandar para piezas de uso comun.'
-      },
-      {
-        value: '8',
-        label: '8 mm',
-        use: 'Ideal para puertas de ducha',
-        kerf: 4,
-        mode: 'Corte reforzado con mas separacion para manipular la pieza.'
-      },
-      {
-        value: '10',
-        label: '10 mm o mas',
-        use: 'Para mamparas y divisiones de oficina',
-        kerf: 5,
-        mode: 'Corte pesado con mayor separacion y cuidado de manipulacion.'
-      }
+      { value: '4', label: '4 mm', use: 'Para ventanas pequenas o claraboyas', kerf: 2, mode: 'Corte delicado con separacion ajustada.' },
+      { value: '6', label: '6 mm', use: 'Usado en ventanas de viviendas y mesas', kerf: 3, mode: 'Corte estandar para piezas de uso comun.' },
+      { value: '8', label: '8 mm', use: 'Ideal para puertas de ducha', kerf: 4, mode: 'Corte reforzado con mas separacion.' },
+      { value: '10', label: '10 mm o mas', use: 'Para mamparas y divisiones de oficina', kerf: 5, mode: 'Corte pesado con mayor cuidado de manipulacion.' }
     ];
     const COLORS = [
-      '#2BB3A3', '#E6A23C', '#4E8DEB', '#D96953', '#7BAE46', '#B66CCB',
-      '#35A7C9', '#D48A2F', '#6B86D6', '#CC5C8A', '#21A06E', '#A77A42'
+      '#2BB3A3','#E6A23C','#4E8DEB','#D96953','#7BAE46','#B66CCB',
+      '#35A7C9','#D48A2F','#6B86D6','#CC5C8A','#21A06E','#A77A42'
     ];
 
-    const state = {
-      sheetW: DEFAULT_SHEET_W,
-      sheetH: DEFAULT_SHEET_H,
-      thickness: DEFAULT_THICKNESS,
-      kerf: 3,
-      cuts: []
-    };
-
+    const state = { sheetW: DEFAULT_SHEET_W, sheetH: DEFAULT_SHEET_H, thickness: DEFAULT_THICKNESS, kerf: 3, cuts: [], clientName: '', clientNotes: '' };
     let cutId = 1;
-    let lastPack = null;
+    let lastPacks = [];     // array de packs (una por lamina)
+    let activeSheet = 0;
 
     const els = {
-      sheetW: document.getElementById('sheet-w'),
-      sheetH: document.getElementById('sheet-h'),
-      thickness: document.getElementById('thickness'),
+      sheetW:        document.getElementById('sheet-w'),
+      sheetH:        document.getElementById('sheet-h'),
+      thickness:     document.getElementById('thickness'),
       thicknessHint: document.getElementById('thickness-hint'),
-      kerf: document.getElementById('kerf'),
-      cutsList: document.getElementById('cuts-list'),
-      error: document.getElementById('err-msg'),
-      resultArea: document.getElementById('result-area'),
-      metrics: document.getElementById('metrics'),
-      advice: document.getElementById('advice-box'),
-      canvasWrap: document.getElementById('canvas-wrap'),
-      canvas: document.getElementById('cv'),
-      legend: document.getElementById('legend'),
-      exportBtn: document.getElementById('export-btn')
+      kerf:          document.getElementById('kerf'),
+      priceM2:       document.getElementById('price-m2'),
+      clientName:    document.getElementById('client-name'),
+      clientNotes:   document.getElementById('client-notes'),
+      cutsList:      document.getElementById('cuts-list'),
+      errMsg:        document.getElementById('err-msg'),
+      calcBtn:       document.getElementById('calc-btn'),
+      addBtn:        document.getElementById('add-btn'),
+      sampleBtn:     document.getElementById('sample-btn'),
+      clearBtn:      document.getElementById('clear-btn'),
+      exportBtn:     document.getElementById('export-btn'),
+      historyBtn:    document.getElementById('history-btn'),
+      resultArea:    document.getElementById('result-area'),
+      metrics:       document.getElementById('metrics'),
+      adviceBox:     document.getElementById('advice-box'),
+      canvasWrap:    document.getElementById('canvas-wrap'),
+      canvas:        document.getElementById('cv'),
+      legend:        document.getElementById('legend'),
+      multiArea:     document.getElementById('multi-sheets-area'),
+      multiLabel:    document.getElementById('multi-sheets-label'),
+      sheetTabs:     document.getElementById('sheet-tabs'),
+      sheetIndicator:document.getElementById('sheet-indicator'),
+      pieceListArea: document.getElementById('piece-list-area'),
+      pieceList:     document.getElementById('piece-list'),
+      historyModal:  document.getElementById('history-modal'),
+      historyList:   document.getElementById('history-list'),
+      historyClose:  document.getElementById('history-close'),
     };
 
-    document.getElementById('add-btn').addEventListener('click', () => addCut());
-    document.getElementById('calc-btn').addEventListener('click', calculate);
-    document.getElementById('clear-btn').addEventListener('click', clearAll);
-    document.getElementById('sample-btn').addEventListener('click', loadSample);
-    els.exportBtn.addEventListener('click', exportPng);
+    // === INIT ===
     els.thickness.addEventListener('change', () => {
       const option = getThicknessOption();
       state.thickness = option.value;
@@ -662,33 +830,31 @@
       state.kerf = option.kerf;
       updateThicknessHint();
       resetResult();
-      saveState();
     });
-    [els.sheetW, els.sheetH, els.kerf].forEach(input => {
-      input.addEventListener('input', () => {
-        syncSheetState();
-        saveState();
-      });
-    });
+    [els.sheetW, els.sheetH, els.kerf].forEach(input => input.addEventListener('input', () => { syncSheetState(); resetResult(); saveState(); }));
+    [els.clientName, els.clientNotes].forEach(input => input.addEventListener('input', () => { state.clientName = els.clientName.value; state.clientNotes = els.clientNotes.value; saveState(); }));
+    els.addBtn.addEventListener('click', () => addCut());
+    els.calcBtn.addEventListener('click', calculate);
+    els.sampleBtn.addEventListener('click', loadSample);
+    els.clearBtn.addEventListener('click', clearAll);
+    els.exportBtn.addEventListener('click', exportPdf);
+    els.historyBtn.addEventListener('click', openHistory);
+    els.historyClose.addEventListener('click', () => { els.historyModal.style.display = 'none'; });
+    els.historyModal.addEventListener('click', e => { if (e.target === els.historyModal) els.historyModal.style.display = 'none'; });
 
-    window.addEventListener('resize', () => {
-      if (lastPack) drawCanvas(lastPack.placed, lastPack.sheetW, lastPack.sheetH);
-    });
-
-    init();
+    window.addEventListener('resize', () => { if (lastPacks.length) drawCanvas(lastPacks[activeSheet].placed, state.sheetW, state.sheetH, activeSheet); });
 
     function init() {
-      if (!loadState()) {
-        loadSample(false);
-      }
+      updateThicknessHint();
+      if (!loadState()) loadSample(false);
       renderCuts();
     }
+    init();
 
     function syncSheetState() {
-      state.sheetW = els.sheetW.value;
-      state.sheetH = els.sheetH.value;
-      state.thickness = els.thickness.value;
-      state.kerf = els.kerf.value;
+      state.sheetW = parseFloat(els.sheetW.value) || DEFAULT_SHEET_W;
+      state.sheetH = parseFloat(els.sheetH.value) || DEFAULT_SHEET_H;
+      state.kerf = parseFloat(els.kerf.value) || 3;
     }
 
     function hydrateSheetInputs() {
@@ -696,99 +862,92 @@
       els.sheetH.value = state.sheetH;
       els.thickness.value = state.thickness;
       els.kerf.value = state.kerf;
+      els.clientName.value = state.clientName || '';
+      els.clientNotes.value = state.clientNotes || '';
       updateThicknessHint();
     }
 
+    // === CUTS ===
     function addCut(w = '', h = '', qty = 1) {
       state.cuts.push({ id: cutId++, w, h, qty });
-      renderCuts();
-      saveState();
+      renderCuts(); saveState();
     }
 
     function duplicateCut(id) {
-      const source = state.cuts.find(cut => cut.id === id);
-      if (!source) return;
-      state.cuts.push({ ...source, id: cutId++ });
-      renderCuts();
-      saveState();
+      const source = state.cuts.find(c => c.id === id);
+      if (source) { state.cuts.push({ id: cutId++, w: source.w, h: source.h, qty: source.qty }); renderCuts(); saveState(); }
     }
 
     function removeCut(id) {
-      state.cuts = state.cuts.filter(cut => cut.id !== id);
-      renderCuts();
-      saveState();
+      state.cuts = state.cuts.filter(c => c.id !== id);
+      renderCuts(); resetResult(); saveState();
     }
 
     function updateCut(id, field, value) {
-      const cut = state.cuts.find(item => item.id === id);
-      if (!cut) return;
-      cut[field] = value;
-      saveState();
+      const cut = state.cuts.find(c => c.id === id);
+      if (cut) { cut[field] = value; resetResult(); saveState(); }
     }
 
     function renderCuts() {
-      els.cutsList.innerHTML = '';
       if (state.cuts.length === 0) {
         const empty = document.createElement('div');
-        empty.className = 'empty-state';
-        empty.textContent = 'Sin piezas registradas';
-        els.cutsList.appendChild(empty);
+        empty.className = 'cuts-empty';
+        empty.textContent = 'Sin piezas. Agrega al menos una.';
+        els.cutsList.replaceChildren(empty);
         return;
       }
-
-      state.cuts.forEach((cut, index) => {
+      const rows = state.cuts.map((cut, idx) => {
         const row = document.createElement('div');
-        row.className = 'cut-item';
+        row.className = 'cut-row';
         row.innerHTML = `
-          <span class="cut-index">${index + 1}</span>
-          <div class="cut-field">
-            <label for="cut-w-${cut.id}">Ancho</label>
-            <input id="cut-w-${cut.id}" type="number" min="1" step="0.1" inputmode="decimal" value="${escapeAttr(cut.w)}">
-          </div>
-          <div class="cut-field">
-            <label for="cut-h-${cut.id}">Alto</label>
-            <input id="cut-h-${cut.id}" type="number" min="1" step="0.1" inputmode="decimal" value="${escapeAttr(cut.h)}">
-          </div>
-          <div class="cut-field qty">
-            <label for="cut-q-${cut.id}">Cant.</label>
-            <input id="cut-q-${cut.id}" type="number" min="1" max="999" step="1" inputmode="numeric" value="${escapeAttr(cut.qty)}">
-          </div>
-          <button class="icon-btn" type="button" title="Duplicar pieza" aria-label="Duplicar pieza">+</button>
-          <button class="icon-btn danger" type="button" title="Eliminar pieza" aria-label="Eliminar pieza">x</button>
+          <span class="cut-index">${idx + 1}</span>
+          <input type="number" min="1" step="0.1" placeholder="Ancho" value="${escapeAttr(cut.w)}" inputmode="decimal" aria-label="Ancho pieza ${idx+1}">
+          <input type="number" min="1" step="0.1" placeholder="Alto" value="${escapeAttr(cut.h)}" inputmode="decimal" aria-label="Alto pieza ${idx+1}">
+          <input type="number" min="1" step="1" placeholder="Cant" value="${escapeAttr(cut.qty)}" inputmode="numeric" aria-label="Cantidad pieza ${idx+1}">
+          <button class="icon-btn" title="Duplicar" aria-label="Duplicar pieza ${idx+1}">⊕</button>
+          <button class="icon-btn danger" title="Eliminar" aria-label="Eliminar pieza ${idx+1}">✕</button>
         `;
-
         const [wInput, hInput, qInput] = row.querySelectorAll('input');
-        wInput.addEventListener('input', event => updateCut(cut.id, 'w', event.target.value));
-        hInput.addEventListener('input', event => updateCut(cut.id, 'h', event.target.value));
-        qInput.addEventListener('input', event => updateCut(cut.id, 'qty', event.target.value));
+        wInput.addEventListener('input', () => updateCut(cut.id, 'w', wInput.value));
+        hInput.addEventListener('input', () => updateCut(cut.id, 'h', hInput.value));
+        qInput.addEventListener('input', () => updateCut(cut.id, 'qty', qInput.value));
         row.querySelectorAll('button')[0].addEventListener('click', () => duplicateCut(cut.id));
         row.querySelectorAll('button')[1].addEventListener('click', () => removeCut(cut.id));
-        els.cutsList.appendChild(row);
+        return row;
       });
+      els.cutsList.replaceChildren(...rows);
     }
 
+    // === CALCULATE ===
     function calculate() {
       hideError();
-      syncSheetState();
-
       const validation = buildPieces();
-      if (validation.error) {
-        showError(validation.error);
-        return;
-      }
+      if (validation.error) { showError(validation.error); return; }
 
       const { sheetW, sheetH, kerfMm, kerfCm, thickness, pieces } = validation;
-      const pack = findBestPack(pieces, sheetW, sheetH, kerfCm);
+      state.sheetW = sheetW; state.sheetH = sheetH;
 
-      if (!pack || pack.placed.length < pieces.length) {
-        const placed = pack ? pack.placed.length : 0;
-        showError(`No fue posible acomodar todo el pedido. Mejor intento: ${placed} de ${pieces.length} piezas colocadas.`);
-        return;
+      // Algoritmo multi-lamina
+      const allPacks = [];
+      let remaining = [...pieces];
+      let sheetIndex = 0;
+
+      while (remaining.length > 0) {
+        const pack = findBestPack(remaining, sheetW, sheetH, kerfCm);
+        if (!pack || pack.placed.length === 0) { showError('Hay piezas que no caben en la lamina. Revisa las dimensiones.'); return; }
+        // Marcar numero de lamina y numero de pieza global
+        pack.placed.forEach((p, i) => { p.sheetIndex = sheetIndex; p.pieceNum = allPacks.reduce((s, pk) => s + pk.placed.length, 0) + i + 1; });
+        allPacks.push({ ...pack, sheetW, sheetH, kerfMm, thickness });
+        const placedOrigIds = new Set(pack.placed.map(p => p.origId));
+        remaining = remaining.filter(p => !placedOrigIds.has(p.origId));
+        sheetIndex++;
+        if (sheetIndex > 20) break; // safety
       }
 
-      lastPack = { ...pack, sheetW, sheetH, kerfMm, thickness };
-      renderResult(lastPack, sheetW, sheetH);
-      saveState();
+      lastPacks = allPacks;
+      activeSheet = 0;
+      saveToHistory(allPacks, sheetW, sheetH, kerfMm, thickness);
+      renderResult(allPacks, sheetW, sheetH);
     }
 
     function buildPieces() {
@@ -797,103 +956,61 @@
       const kerfMm = parseNonNegative(els.kerf.value);
       const thickness = getThicknessOption();
 
-      if (!sheetW || !sheetH) {
-        return { error: 'Ingresa dimensiones validas para la lamina.' };
-      }
-      if (kerfMm === null || kerfMm > 20) {
-        return { error: 'El kerf debe estar entre 0 y 20 mm.' };
-      }
-      if (kerfMm < thickness.kerf) {
-        return { error: `Para vidrio de ${thickness.label}, usa un kerf minimo de ${formatMm(thickness.kerf)} mm.` };
-      }
-      if (state.cuts.length === 0) {
-        return { error: 'Agrega al menos una pieza para cortar.' };
-      }
+      if (!sheetW || !sheetH) return { error: 'Las dimensiones de la lamina deben ser mayores que cero.' };
+      if (kerfMm === null || kerfMm > 20) return { error: 'El kerf debe estar entre 0 y 20 mm.' };
+      if (kerfMm < thickness.kerf) return { error: `Para vidrio de ${thickness.label}, usa un kerf minimo de ${formatMm(thickness.kerf)} mm.` };
+      if (state.cuts.length === 0) return { error: 'Agrega al menos una pieza.' };
 
       const pieces = [];
       const kerfCm = kerfMm / 10;
+      let pieceCounter = 0;
 
       for (const [index, cut] of state.cuts.entries()) {
-        const w = parsePositive(cut.w);
-        const h = parsePositive(cut.h);
-        const qty = parseInteger(cut.qty);
+        const w = parsePositive(cut.w), h = parsePositive(cut.h), qty = parseInteger(cut.qty);
         const label = `Pieza ${index + 1}`;
-
-        if (!w || !h) {
-          return { error: `${label}: revisa ancho y alto.` };
-        }
-        if (!qty || qty < 1 || qty > 999) {
-          return { error: `${label}: la cantidad debe ser un numero entero entre 1 y 999.` };
-        }
-        if (!fitsAnyOrientation(w, h, sheetW, sheetH)) {
-          return { error: `${label}: ${formatCm(w)} x ${formatCm(h)} cm no cabe en la lamina ${formatCm(sheetW)} x ${formatCm(sheetH)} cm.` };
-        }
-
+        if (!w || !h) return { error: `${label}: ancho y alto deben ser mayores que cero.` };
+        if (!qty || qty < 1) return { error: `${label}: la cantidad debe ser al menos 1.` };
+        if (!fitsAnyOrientation(w, h, sheetW, sheetH)) return { error: `${label} (${w} x ${h} cm) no cabe en la lamina (${sheetW} x ${sheetH} cm).` };
+        const color = COLORS[(index) % COLORS.length];
         for (let i = 0; i < qty; i++) {
-          pieces.push({
-            id: `${cut.id}-${i}`,
-            groupId: cut.id,
-            origW: w,
-            origH: h,
-            w,
-            h,
-            area: w * h
-          });
+          pieces.push({ w, h, origW: w, origH: h, color, label, origId: pieceCounter++, cutIndex: index });
         }
       }
-
-      if (pieces.reduce((sum, piece) => sum + piece.area, 0) > sheetW * sheetH + 0.001) {
-        return { error: 'El area total de las piezas supera el area de la lamina.' };
-      }
-
       return { sheetW, sheetH, kerfMm, kerfCm, thickness, pieces };
     }
 
+    // === PACK ALGORITHM ===
     function findBestPack(pieces, sheetW, sheetH, kerfCm) {
       const sorters = [
-        (a, b) => b.area - a.area,
+        (a, b) => b.w * b.h - a.w * a.h,
         (a, b) => Math.max(b.w, b.h) - Math.max(a.w, a.h),
-        (a, b) => b.w - a.w || b.h - a.h,
-        (a, b) => b.h - a.h || b.w - a.w,
+        (a, b) => b.w - a.w,
+        (a, b) => b.h - a.h,
         (a, b) => Math.abs(b.w - b.h) - Math.abs(a.w - a.h)
       ];
-
       let best = null;
       for (const sorter of sorters) {
         const ordered = [...pieces].sort(sorter);
         const pack = guillotinePack(ordered, sheetW, sheetH, kerfCm);
         best = chooseBetterPack(best, pack, pieces.length, sheetW, sheetH);
-        if (best && best.placed.length === pieces.length && best.freeArea < kerfCm) break;
+        if (best && best.placed.length === pieces.length) break;
       }
       return best;
     }
 
     function chooseBetterPack(current, candidate, totalPieces, sheetW, sheetH) {
       if (!candidate) return current;
-      candidate.freeArea = calculateFreeArea(candidate.freeRects);
-      candidate.largestFreeRect = getLargestFreeRect(candidate.freeRects);
-      candidate.largestFree = candidate.largestFreeRect ? candidate.largestFreeRect.w * candidate.largestFreeRect.h : 0;
-      candidate.score = candidate.placed.length * sheetW * sheetH + candidate.largestFree - candidate.freeRects.length * 0.01;
-
       if (!current) return candidate;
-      if (candidate.placed.length !== current.placed.length) {
-        return candidate.placed.length > current.placed.length ? candidate : current;
-      }
-      if (candidate.placed.length === totalPieces && candidate.largestFree !== current.largestFree) {
-        return candidate.largestFree > current.largestFree ? candidate : current;
-      }
-      return candidate.score > current.score ? candidate : current;
+      if (candidate.placed.length > current.placed.length) return candidate;
+      if (candidate.placed.length === current.placed.length && candidate.freeArea < current.freeArea) return candidate;
+      return current;
     }
 
     function guillotinePack(pieces, sheetW, sheetH, kerfCm) {
       const freeRects = [{ x: 0, y: 0, w: sheetW, h: sheetH }];
       const placed = [];
-      const colorMap = new Map();
-      let colorIndex = 0;
-
       for (const piece of pieces) {
-        let best = null;
-
+        let best = null, bestIdx = -1;
         for (let i = 0; i < freeRects.length; i++) {
           const rect = freeRects[i];
           for (const rotated of [false, true]) {
@@ -901,135 +1018,124 @@
             const h = rotated ? piece.w : piece.h;
             if (w <= rect.w + 0.001 && h <= rect.h + 0.001) {
               const shortSide = Math.min(rect.w - w, rect.h - h);
-              const longSide = Math.max(rect.w - w, rect.h - h);
-              const score = shortSide * 100000 + longSide;
-              if (!best || score < best.score) {
-                best = { rectIndex: i, rotated, w, h, score };
-              }
+              if (!best || shortSide < best.score) { best = { w, h, rotated, score: shortSide }; bestIdx = i; }
             }
           }
         }
-
-        if (!best) break;
-
-        const rect = freeRects[best.rectIndex];
-        const key = `${piece.origW}x${piece.origH}`;
-        if (!colorMap.has(key)) {
-          colorMap.set(key, COLORS[colorIndex++ % COLORS.length]);
-        }
-
-        placed.push({
-          x: rect.x,
-          y: rect.y,
-          w: best.w,
-          h: best.h,
-          origW: piece.origW,
-          origH: piece.origH,
-          rotated: best.rotated,
-          color: colorMap.get(key)
-        });
-
-        const splitByWidth = rect.w - best.w > rect.h - best.h;
+        if (!best) continue;
+        const rect = freeRects[bestIdx];
+        placed.push({ ...piece, x: rect.x, y: rect.y, w: best.w, h: best.h, origW: piece.origW, origH: piece.origH, rotated: best.rotated });
+        const splitH = best.w < best.h;
+        freeRects.splice(bestIdx, 1);
         const rightW = rect.w - best.w - kerfCm;
         const bottomH = rect.h - best.h - kerfCm;
-        const newRects = [];
-
-        if (splitByWidth) {
-          if (rightW > 0.001) {
-            newRects.push({ x: rect.x + best.w + kerfCm, y: rect.y, w: rightW, h: rect.h });
-          }
-          if (bottomH > 0.001) {
-            newRects.push({ x: rect.x, y: rect.y + best.h + kerfCm, w: best.w, h: bottomH });
-          }
+        if (splitH) {
+          if (rightW > 0.001) freeRects.push({ x: rect.x + best.w + kerfCm, y: rect.y, w: rightW, h: rect.h });
+          if (bottomH > 0.001) freeRects.push({ x: rect.x, y: rect.y + best.h + kerfCm, w: best.w, h: bottomH });
         } else {
-          if (bottomH > 0.001) {
-            newRects.push({ x: rect.x, y: rect.y + best.h + kerfCm, w: rect.w, h: bottomH });
-          }
-          if (rightW > 0.001) {
-            newRects.push({ x: rect.x + best.w + kerfCm, y: rect.y, w: rightW, h: best.h });
-          }
+          if (bottomH > 0.001) freeRects.push({ x: rect.x, y: rect.y + best.h + kerfCm, w: rect.w, h: bottomH });
+          if (rightW > 0.001) freeRects.push({ x: rect.x + best.w + kerfCm, y: rect.y, w: rightW, h: best.h });
         }
-
-        freeRects.splice(best.rectIndex, 1, ...newRects);
         pruneFreeRects(freeRects);
       }
-
-      return { placed, freeRects };
+      const freeArea = calculateFreeArea(freeRects);
+      const largestFreeRect = getLargestFreeRect(freeRects);
+      return { placed, freeRects, freeArea, largestFreeRect };
     }
 
     function pruneFreeRects(rects) {
       for (let i = rects.length - 1; i >= 0; i--) {
         const a = rects[i];
-        if (a.w <= 0.001 || a.h <= 0.001) {
-          rects.splice(i, 1);
-          continue;
-        }
+        if (a.w <= 0.001 || a.h <= 0.001) { rects.splice(i, 1); continue; }
         for (let j = rects.length - 1; j >= 0; j--) {
           if (i === j) continue;
-          const b = rects[j];
-          if (isContainedIn(a, b)) {
-            rects.splice(i, 1);
-            break;
-          }
+          if (isContainedIn(a, rects[j])) { rects.splice(i, 1); break; }
         }
       }
     }
 
-    function renderResult(pack, sheetW, sheetH) {
-      const totalSheet = sheetW * sheetH;
-      const usedArea = pack.placed.reduce((sum, piece) => sum + piece.origW * piece.origH, 0);
-      const usedPct = usedArea / totalSheet * 100;
-      const wasteArea = Math.max(0, totalSheet - usedArea);
-      const wastePct = Math.max(0, 100 - usedPct);
+    // === RENDER RESULT ===
+    function renderResult(allPacks, sheetW, sheetH) {
+      const totalPieces = allPacks.reduce((s, p) => s + p.placed.length, 0);
+      const totalSheetArea = allPacks.length * sheetW * sheetH;
+      const totalUsed = allPacks.reduce((s, p) => s + p.placed.reduce((ss, pc) => ss + pc.origW * pc.origH, 0), 0);
+      const usedPct = totalUsed / totalSheetArea * 100;
+      const wastePct = 100 - usedPct;
+      const wasteArea = totalSheetArea - totalUsed;
       const efficiencyClass = usedPct >= 85 ? 'good' : usedPct >= 65 ? 'warn' : 'bad';
+      const priceM2 = parseFloat(els.priceM2.value);
+      const hasPrice = priceM2 > 0;
 
       els.resultArea.classList.add('visible');
       els.exportBtn.disabled = false;
 
+      // Metricas
       els.metrics.innerHTML = `
-        <div class="metric ${efficiencyClass}">
-          <div class="value">${usedPct.toFixed(1)}%</div>
-          <div class="label">Aprovechamiento</div>
-        </div>
-        <div class="metric">
-          <div class="value">${wastePct.toFixed(1)}%</div>
-          <div class="label">Desperdicio</div>
-        </div>
-        <div class="metric">
-          <div class="value">${pack.placed.length}</div>
-          <div class="label">Piezas colocadas</div>
-        </div>
-        <div class="metric">
-          <div class="value">${formatArea(wasteArea)}</div>
-          <div class="label">Sobrante total</div>
-        </div>
+        <div class="metric ${efficiencyClass}"><div class="value">${usedPct.toFixed(1)}%</div><div class="label">Aprovechamiento</div></div>
+        <div class="metric"><div class="value">${wastePct.toFixed(1)}%</div><div class="label">Desperdicio</div></div>
+        <div class="metric"><div class="value">${totalPieces}</div><div class="label">Piezas colocadas</div></div>
+        <div class="metric"><div class="value">${allPacks.length}</div><div class="label">Laminas necesarias</div></div>
       `;
 
-      const advice = buildAdvice(usedPct, wastePct, pack.largestFreeRect, pack.thickness, pack.kerfMm);
-      els.advice.className = `advice ${efficiencyClass}`;
-      els.advice.textContent = advice;
+      // Advice
+      const largest = allPacks[0].largestFreeRect;
+      const freeText = largest ? ` Mayor sobrante en lamina 1: ${formatRect(largest)} (${formatArea(largest.w * largest.h)}).` : '';
+      const thicknessText = allPacks[0].thickness ? ` Espesor: ${allPacks[0].thickness.label}. ${allPacks[0].thickness.use}. Kerf: ${formatMm(allPacks[0].kerfMm)} mm.` : '';
+      let advice = usedPct >= 85
+        ? `Corte eficiente: se aprovecha el ${usedPct.toFixed(1)}% en ${allPacks.length} lamina(s).${freeText}${thicknessText}`
+        : usedPct >= 65
+        ? `Corte aceptable: se aprovecha el ${usedPct.toFixed(1)}% en ${allPacks.length} lamina(s). Considera agregar mas piezas para reducir el sobrante.${freeText}${thicknessText}`
+        : `Corte ineficiente: solo el ${usedPct.toFixed(1)}% aprovechado en ${allPacks.length} lamina(s). Conviene revisar tamanios o agrupar pedidos.${freeText}${thicknessText}`;
+      els.adviceBox.className = `advice ${efficiencyClass}`;
+      els.adviceBox.textContent = advice;
 
-      drawCanvas(pack.placed, sheetW, sheetH);
-      renderLegend(pack.placed);
+      // Costos
+      const costBlock = document.getElementById('cost-block');
+      if (costBlock) costBlock.remove();
+      if (hasPrice) {
+        const usedAreaM2 = totalUsed / 10000;
+        const wasteAreaM2 = wasteArea / 10000;
+        const totalSheetM2 = totalSheetArea / 10000;
+        const costTotal = totalSheetM2 * priceM2;
+        const costUsed = usedAreaM2 * priceM2;
+        const costWaste = wasteAreaM2 * priceM2;
+        const block = document.createElement('div');
+        block.id = 'cost-block';
+        block.className = 'cost-block';
+        block.innerHTML = `
+          <div class="cost-row"><span>Costo total de la(s) lamina(s)</span><strong>${formatCOP(costTotal)}</strong></div>
+          <div class="cost-row"><span>Costo del material aprovechado</span><strong>${formatCOP(costUsed)}</strong></div>
+          <div class="cost-row"><span>Costo del desperdicio</span><strong>${formatCOP(costWaste)}</strong></div>
+        `;
+        els.adviceBox.insertAdjacentElement('afterend', block);
+      }
+
+      // Tabs multi-lamina
+      if (allPacks.length > 1) {
+        els.multiArea.style.display = '';
+        els.multiLabel.textContent = `${allPacks.length} laminas necesarias.`;
+        els.sheetTabs.innerHTML = allPacks.map((_, i) =>
+          `<button class="sheet-tab${i === 0 ? ' active' : ''}" data-idx="${i}">Lamina ${i + 1}</button>`
+        ).join('');
+        els.sheetTabs.querySelectorAll('.sheet-tab').forEach(btn => {
+          btn.addEventListener('click', () => {
+            activeSheet = parseInt(btn.dataset.idx);
+            els.sheetTabs.querySelectorAll('.sheet-tab').forEach(b => b.classList.toggle('active', b === btn));
+            drawCanvas(lastPacks[activeSheet].placed, sheetW, sheetH, activeSheet);
+            renderLegend(lastPacks[activeSheet].placed);
+          });
+        });
+      } else {
+        els.multiArea.style.display = 'none';
+      }
+
+      drawCanvas(allPacks[0].placed, sheetW, sheetH, 0);
+      renderLegend(allPacks[0].placed);
+      renderPieceList(allPacks);
     }
 
-    function buildAdvice(usedPct, wastePct, largestFreeRect, thickness, kerfMm) {
-      const freeText = largestFreeRect
-        ? ` Mayor sobrante: ${formatRect(largestFreeRect)} (${formatArea(largestFreeRect.w * largestFreeRect.h)}).`
-        : '';
-      const thicknessText = thickness
-        ? ` Espesor: ${thickness.label}. ${thickness.use}. ${thickness.mode} Kerf aplicado: ${formatMm(kerfMm)} mm.`
-        : '';
-      if (usedPct >= 85) {
-        return `Corte eficiente: se aprovecha el ${usedPct.toFixed(1)}% de la lamina y queda ${wastePct.toFixed(1)}% de desperdicio.${freeText}${thicknessText}`;
-      }
-      if (usedPct >= 65) {
-        return `Corte aceptable: se aprovecha el ${usedPct.toFixed(1)}%. Puedes revisar si una lamina mas pequena o piezas adicionales reducen el ${wastePct.toFixed(1)}% sobrante.${freeText}${thicknessText}`;
-      }
-      return `Corte ineficiente: solo se aprovecha el ${usedPct.toFixed(1)}%. Conviene cambiar tamano de lamina, agrupar mas piezas o reservar el sobrante para otro pedido.${freeText}${thicknessText}`;
-    }
-
-    function drawCanvas(placed, sheetW, sheetH) {
+    // === CANVAS ===
+    function drawCanvas(placed, sheetW, sheetH, sheetIdx) {
       const cssWidth = Math.max(320, els.canvasWrap.clientWidth - 2);
       const scale = cssWidth / sheetW;
       const canvasW = cssWidth;
@@ -1048,12 +1154,11 @@
       ctx.fillStyle = dark ? '#263437' : '#eef2f3';
       ctx.fillRect(0, 0, canvasW, canvasH);
       drawGrid(ctx, canvasW, canvasH);
-
       ctx.strokeStyle = dark ? '#83949b' : '#9facb3';
       ctx.lineWidth = 1;
       ctx.strokeRect(0.5, 0.5, canvasW - 1, canvasH - 1);
 
-      for (const piece of placed) {
+      placed.forEach((piece, i) => {
         const x = Math.round(piece.x * scale);
         const y = Math.round(piece.y * scale);
         const w = Math.max(1, Math.round(piece.w * scale));
@@ -1065,39 +1170,42 @@
         ctx.lineWidth = 1.5;
         ctx.strokeRect(x + 0.5, y + 0.5, Math.max(0, w - 1), Math.max(0, h - 1));
 
+        // Numero de pieza en esquina
+        const num = piece.pieceNum || (i + 1);
+        const numSize = Math.max(9, Math.min(12, w * 0.25, h * 0.25));
+        ctx.fillStyle = piece.color;
+        ctx.fillRect(x + 2, y + 2, numSize + 6, numSize + 4);
+        ctx.fillStyle = '#fff';
+        ctx.font = `700 ${numSize}px ${getComputedStyle(document.body).fontFamily}`;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        ctx.fillText(num, x + 5, y + 4);
+
+        // Label central
         const label = `${formatCm(piece.origW)}x${formatCm(piece.origH)}${piece.rotated ? ' R' : ''}`;
         const fontSize = Math.max(9, Math.min(13, w / Math.max(5, label.length * 0.55), h * 0.34));
         ctx.font = `700 ${fontSize}px ${getComputedStyle(document.body).fontFamily}`;
         const textW = ctx.measureText(label).width;
         if (textW + 9 < w && fontSize + 7 < h) {
-          const tx = x + w / 2;
-          const ty = y + h / 2;
-          ctx.fillStyle = dark ? 'rgba(16, 23, 25, 0.72)' : 'rgba(255, 255, 255, 0.82)';
+          const tx = x + w / 2, ty = y + h / 2;
+          ctx.fillStyle = dark ? 'rgba(16,23,25,0.72)' : 'rgba(255,255,255,0.82)';
           ctx.fillRect(tx - textW / 2 - 4, ty - fontSize / 2 - 3, textW + 8, fontSize + 7);
           ctx.fillStyle = dark ? '#edf3f4' : '#172025';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           ctx.fillText(label, tx, ty);
         }
-      }
+      });
+
+      els.sheetIndicator.textContent = lastPacks.length > 1 ? `Lamina ${sheetIdx + 1} de ${lastPacks.length}` : '';
     }
 
     function drawGrid(ctx, width, height) {
       ctx.save();
-      ctx.strokeStyle = 'rgba(127, 145, 152, 0.16)';
+      ctx.strokeStyle = 'rgba(127,145,152,0.16)';
       ctx.lineWidth = 1;
-      for (let x = 40; x < width; x += 40) {
-        ctx.beginPath();
-        ctx.moveTo(x + 0.5, 0);
-        ctx.lineTo(x + 0.5, height);
-        ctx.stroke();
-      }
-      for (let y = 40; y < height; y += 40) {
-        ctx.beginPath();
-        ctx.moveTo(0, y + 0.5);
-        ctx.lineTo(width, y + 0.5);
-        ctx.stroke();
-      }
+      for (let x = 40; x < width; x += 40) { ctx.beginPath(); ctx.moveTo(x + 0.5, 0); ctx.lineTo(x + 0.5, height); ctx.stroke(); }
+      for (let y = 40; y < height; y += 40) { ctx.beginPath(); ctx.moveTo(0, y + 0.5); ctx.lineTo(width, y + 0.5); ctx.stroke(); }
       ctx.restore();
     }
 
@@ -1110,74 +1218,194 @@
         entry.rotated = entry.rotated || piece.rotated;
         groups.set(key, entry);
       }
-
-      const items = [...groups.entries()].map(([label, item]) => `
-        <span class="legend-item">
-          <span class="legend-dot" style="background:${item.color}"></span>
-          ${label} (${item.count})${item.rotated ? ' rotada' : ''}
-        </span>
-      `);
-      items.push(`
-        <span class="legend-item">
-          <span class="legend-dot" style="background:rgba(127,145,152,0.18);border-color:rgba(127,145,152,0.42)"></span>
-          Sobrante
-        </span>
-      `);
+      const items = [...groups.entries()].map(([label, item]) =>
+        `<span class="legend-item"><span class="legend-dot" style="background:${item.color}"></span>${label} (${item.count})${item.rotated ? ' rotada' : ''}</span>`
+      );
+      items.push(`<span class="legend-item"><span class="legend-dot" style="background:rgba(127,145,152,0.18);border-color:rgba(127,145,152,0.42)"></span>Sobrante</span>`);
       els.legend.innerHTML = items.join('');
     }
 
-    function clearAll() {
-      const thickness = getThicknessOption(DEFAULT_THICKNESS);
-      state.sheetW = DEFAULT_SHEET_W;
-      state.sheetH = DEFAULT_SHEET_H;
-      state.thickness = thickness.value;
-      state.kerf = thickness.kerf;
-      state.cuts = [];
+    // === ORDEN DE CORTE ===
+    function renderPieceList(allPacks) {
+      els.pieceListArea.style.display = '';
+      let rows = '';
+      allPacks.forEach((pack, si) => {
+        pack.placed.forEach((p, i) => {
+          const num = p.pieceNum || (i + 1);
+          rows += `<tr>
+            <td><span class="piece-num" style="background:${p.color}">${num}</span></td>
+            <td>${allPacks.length > 1 ? `Lamina ${si + 1}` : '—'}</td>
+            <td>${formatCm(p.origW)} × ${formatCm(p.origH)} cm</td>
+            <td>${p.rotated ? 'Si' : 'No'}</td>
+            <td>${formatCm(p.x)} , ${formatCm(p.y)}</td>
+          </tr>`;
+        });
+      });
+      els.pieceList.innerHTML = `
+        <table class="piece-list-table">
+          <thead><tr><th>#</th><th>Lamina</th><th>Medida</th><th>Rotada</th><th>Posicion (x, y)</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+    }
+
+    // === HISTORIAL ===
+    function saveToHistory(allPacks, sheetW, sheetH, kerfMm, thickness) {
+      const history = loadHistory();
+      const entry = {
+        id: Date.now(),
+        date: new Date().toLocaleString('es-CO'),
+        client: els.clientName.value || 'Sin nombre',
+        notes: els.clientNotes.value || '',
+        sheetW, sheetH, kerfMm,
+        thickness: thickness ? thickness.label : '',
+        sheets: allPacks.length,
+        pieces: allPacks.reduce((s, p) => s + p.placed.length, 0),
+        cuts: state.cuts.map(c => ({ w: c.w, h: c.h, qty: c.qty }))
+      };
+      history.unshift(entry);
+      if (history.length > 50) history.splice(50);
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    }
+
+    function loadHistory() {
+      try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch { return []; }
+    }
+
+    function openHistory() {
+      const history = loadHistory();
+      if (history.length === 0) {
+        els.historyList.innerHTML = '<p class="history-empty">No hay pedidos guardados aun.</p>';
+      } else {
+        els.historyList.innerHTML = history.map(e => `
+          <div class="history-item" data-id="${e.id}">
+            <div class="history-item-head">
+              <span class="history-client">${e.client}</span>
+              <span class="history-date">${e.date}</span>
+            </div>
+            <div class="history-meta">${e.sheetW}×${e.sheetH} cm · ${e.thickness} · ${e.pieces} piezas · ${e.sheets} lamina(s)${e.notes ? ' · ' + e.notes : ''}</div>
+          </div>
+        `).join('');
+        els.historyList.querySelectorAll('.history-item').forEach(item => {
+          item.addEventListener('click', () => {
+            const entry = history.find(e => e.id === parseInt(item.dataset.id));
+            if (entry) { loadFromHistory(entry); els.historyModal.style.display = 'none'; }
+          });
+        });
+      }
+      const actionsEl = els.historyList.querySelector('.history-actions');
+      if (!actionsEl && history.length > 0) {
+        const actions = document.createElement('div');
+        actions.className = 'history-actions';
+        actions.innerHTML = `<button class="btn subtle" id="clear-history-btn">Borrar historial</button>`;
+        els.historyList.appendChild(actions);
+        document.getElementById('clear-history-btn').addEventListener('click', () => {
+          localStorage.removeItem(HISTORY_KEY);
+          els.historyList.innerHTML = '<p class="history-empty">Historial borrado.</p>';
+        });
+      }
+      els.historyModal.style.display = 'flex';
+    }
+
+    function loadFromHistory(entry) {
+      state.sheetW = entry.sheetW;
+      state.sheetH = entry.sheetH;
+      state.kerf = entry.kerfMm;
+      state.clientName = entry.client !== 'Sin nombre' ? entry.client : '';
+      state.clientNotes = entry.notes || '';
+      state.cuts = entry.cuts.map(c => ({ id: cutId++, w: c.w, h: c.h, qty: c.qty }));
+      const thicknessVal = THICKNESS_OPTIONS.find(t => t.label === entry.thickness)?.value || DEFAULT_THICKNESS;
+      state.thickness = thicknessVal;
       hydrateSheetInputs();
       renderCuts();
       resetResult();
       saveState();
     }
 
+    // === EXPORT PDF ===
+    function exportPdf() {
+      if (!lastPacks.length) return;
+      const client = els.clientName.value || 'Sin nombre';
+      const notes = els.clientNotes.value;
+      const date = new Date().toLocaleDateString('es-CO');
+      const imgData = els.canvas.toDataURL('image/png');
+      const win = window.open('', '_blank');
+      win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>OptiGlass - ${client}</title>
+      <style>
+        body { font-family: system-ui, sans-serif; padding: 32px; color: #172025; }
+        h1 { font-size: 22px; margin: 0 0 4px; }
+        .sub { color: #65737c; font-size: 13px; margin-bottom: 24px; }
+        .meta { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 20px; font-size: 13px; }
+        .meta div { display: flex; flex-direction: column; gap: 2px; }
+        .meta strong { font-size: 11px; color: #65737c; text-transform: uppercase; letter-spacing: 0.05em; }
+        img { max-width: 100%; border: 1px solid #d5dade; border-radius: 8px; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { text-align: left; padding: 6px 10px; color: #65737c; font-size: 11px; text-transform: uppercase; border-bottom: 1px solid #d5dade; }
+        td { padding: 6px 10px; border-bottom: 1px solid #eef2f3; }
+        @media print { body { padding: 16px; } }
+      </style></head><body>
+      <h1>OptiGlass - Orden de corte</h1>
+      <p class="sub">Generado el ${date}</p>
+      <div class="meta">
+        <div><strong>Cliente</strong>${client}</div>
+        ${notes ? `<div><strong>Notas</strong>${notes}</div>` : ''}
+        <div><strong>Lamina</strong>${state.sheetW} × ${state.sheetH} cm</div>
+        <div><strong>Laminas necesarias</strong>${lastPacks.length}</div>
+        <div><strong>Total piezas</strong>${lastPacks.reduce((s,p)=>s+p.placed.length,0)}</div>
+      </div>
+      <img src="${imgData}">
+      <table>
+        <thead><tr><th>#</th><th>Lamina</th><th>Medida</th><th>Rotada</th><th>Posicion</th></tr></thead>
+        <tbody>
+          ${lastPacks.map((pack, si) => pack.placed.map((p, i) =>
+            `<tr><td>${p.pieceNum || i+1}</td><td>${lastPacks.length > 1 ? si+1 : '—'}</td><td>${formatCm(p.origW)} × ${formatCm(p.origH)} cm</td><td>${p.rotated ? 'Si' : 'No'}</td><td>${formatCm(p.x)}, ${formatCm(p.y)}</td></tr>`
+          ).join('')).join('')}
+        </tbody>
+      </table>
+      <script>window.onload=()=>window.print();<\/script>
+      </body></html>`);
+      win.document.close();
+    }
+
+    // === STATE ===
+    function clearAll() {
+      const thickness = getThicknessOption(DEFAULT_THICKNESS);
+      state.sheetW = DEFAULT_SHEET_W; state.sheetH = DEFAULT_SHEET_H;
+      state.thickness = thickness.value; state.kerf = thickness.kerf;
+      state.cuts = []; state.clientName = ''; state.clientNotes = '';
+      hydrateSheetInputs(); renderCuts(); resetResult(); saveState();
+    }
+
     function loadSample(shouldSave = true) {
       const thickness = getThicknessOption(DEFAULT_THICKNESS);
-      state.sheetW = DEFAULT_SHEET_W;
-      state.sheetH = DEFAULT_SHEET_H;
-      state.thickness = thickness.value;
-      state.kerf = thickness.kerf;
+      state.sheetW = DEFAULT_SHEET_W; state.sheetH = DEFAULT_SHEET_H;
+      state.thickness = thickness.value; state.kerf = thickness.kerf;
+      state.clientName = 'Cliente ejemplo'; state.clientNotes = 'Pedido de muestra';
       state.cuts = [
         { id: cutId++, w: 60, h: 40, qty: 2 },
         { id: cutId++, w: 80, h: 60, qty: 1 },
         { id: cutId++, w: 30, h: 30, qty: 3 },
         { id: cutId++, w: 45, h: 35, qty: 2 }
       ];
-      hydrateSheetInputs();
-      renderCuts();
-      resetResult();
+      hydrateSheetInputs(); renderCuts(); resetResult();
       if (shouldSave) saveState();
     }
 
     function resetResult(options = {}) {
-      lastPack = null;
+      lastPacks = []; activeSheet = 0;
       els.resultArea.classList.remove('visible');
       els.exportBtn.disabled = true;
+      els.pieceListArea.style.display = 'none';
+      els.multiArea.style.display = 'none';
+      const costBlock = document.getElementById('cost-block');
+      if (costBlock) costBlock.remove();
       if (!options.keepError) hideError();
-    }
-
-    function exportPng() {
-      if (!lastPack) return;
-      const link = document.createElement('a');
-      link.download = `optiglass-${new Date().toISOString().slice(0, 10)}.png`;
-      link.href = els.canvas.toDataURL('image/png');
-      link.click();
     }
 
     function saveState() {
       const snapshot = {
-        sheetW: els.sheetW.value,
-        sheetH: els.sheetH.value,
-        thickness: els.thickness.value,
-        kerf: els.kerf.value,
+        sheetW: els.sheetW.value, sheetH: els.sheetH.value,
+        thickness: els.thickness.value, kerf: els.kerf.value,
+        clientName: els.clientName.value, clientNotes: els.clientNotes.value,
         cuts: state.cuts
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
@@ -1194,98 +1422,32 @@
         state.sheetH = saved.sheetH ?? DEFAULT_SHEET_H;
         state.thickness = thickness.value;
         state.kerf = saved.kerf ?? thickness.kerf;
+        state.clientName = saved.clientName || '';
+        state.clientNotes = saved.clientNotes || '';
         state.cuts = saved.cuts.map(cut => ({ ...cut, id: cutId++ }));
         hydrateSheetInputs();
         return true;
-      } catch {
-        return false;
-      }
+      } catch { return false; }
     }
 
-    function showError(message) {
-      resetResult({ keepError: true });
-      els.error.textContent = message;
-      els.error.classList.add('visible');
-    }
-
-    function hideError() {
-      els.error.textContent = '';
-      els.error.classList.remove('visible');
-    }
-
-    function parsePositive(value) {
-      const number = Number.parseFloat(value);
-      return Number.isFinite(number) && number > 0 ? number : null;
-    }
-
-    function parseNonNegative(value) {
-      if (value === '') return null;
-      const number = Number.parseFloat(value);
-      return Number.isFinite(number) && number >= 0 ? number : null;
-    }
-
-    function parseInteger(value) {
-      const number = Number(value);
-      return Number.isInteger(number) ? number : null;
-    }
-
-    function fitsAnyOrientation(w, h, sheetW, sheetH) {
-      return (w <= sheetW && h <= sheetH) || (h <= sheetW && w <= sheetH);
-    }
-
-    function getThicknessOption(value = els.thickness.value) {
-      return THICKNESS_OPTIONS.find(option => option.value === value) ||
-        THICKNESS_OPTIONS.find(option => option.value === DEFAULT_THICKNESS);
-    }
-
-    function updateThicknessHint() {
-      const option = getThicknessOption();
-      els.kerf.min = option.kerf;
-      els.thicknessHint.textContent = `${option.use}. ${option.mode} Kerf minimo sugerido: ${formatMm(option.kerf)} mm.`;
-    }
-
-    function calculateFreeArea(rects) {
-      return rects.reduce((sum, rect) => sum + rect.w * rect.h, 0);
-    }
-
-    function getLargestFreeRect(rects) {
-      return rects.reduce((best, rect) => {
-        if (!best || rect.w * rect.h > best.w * best.h) {
-          return { ...rect };
-        }
-        return best;
-      }, null);
-    }
-
-    function isContainedIn(a, b) {
-      return a.x >= b.x - 0.001 &&
-        a.y >= b.y - 0.001 &&
-        a.x + a.w <= b.x + b.w + 0.001 &&
-        a.y + a.h <= b.y + b.h + 0.001;
-    }
-
-    function formatCm(value) {
-      return Number(value).toLocaleString('es-CO', { maximumFractionDigits: 1 });
-    }
-
-    function formatMm(value) {
-      return Number(value).toLocaleString('es-CO', { maximumFractionDigits: 1 });
-    }
-
-    function formatArea(value) {
-      if (value >= 10000) {
-        return `${(value / 10000).toLocaleString('es-CO', { maximumFractionDigits: 2 })} m2`;
-      }
-      return `${value.toLocaleString('es-CO', { maximumFractionDigits: 0 })} cm2`;
-    }
-
-    function formatRect(rect) {
-      return `${formatCm(rect.w)} x ${formatCm(rect.h)} cm`;
-    }
-
-    function escapeAttr(value) {
-      return String(value ?? '').replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;');
-    }
+    // === UTILS ===
+    function showError(message) { resetResult({ keepError: true }); els.errMsg.textContent = message; els.errMsg.classList.add('visible'); }
+    function hideError() { els.errMsg.textContent = ''; els.errMsg.classList.remove('visible'); }
+    function parsePositive(value) { const n = Number.parseFloat(value); return Number.isFinite(n) && n > 0 ? n : null; }
+    function parseNonNegative(value) { if (value === '') return null; const n = Number.parseFloat(value); return Number.isFinite(n) && n >= 0 ? n : null; }
+    function parseInteger(value) { const n = Number(value); return Number.isInteger(n) ? n : null; }
+    function fitsAnyOrientation(w, h, sW, sH) { return (w <= sW && h <= sH) || (h <= sW && w <= sH); }
+    function getThicknessOption(value = els.thickness.value) { return THICKNESS_OPTIONS.find(o => o.value === value) || THICKNESS_OPTIONS.find(o => o.value === DEFAULT_THICKNESS); }
+    function updateThicknessHint() { const o = getThicknessOption(); els.kerf.min = o.kerf; els.thicknessHint.textContent = `${o.use}. ${o.mode} Kerf minimo sugerido: ${formatMm(o.kerf)} mm.`; }
+    function calculateFreeArea(rects) { return rects.reduce((s, r) => s + r.w * r.h, 0); }
+    function getLargestFreeRect(rects) { return rects.reduce((best, r) => (!best || r.w * r.h > best.w * best.h) ? { ...r } : best, null); }
+    function isContainedIn(a, b) { return a.x >= b.x - 0.001 && a.y >= b.y - 0.001 && a.x + a.w <= b.x + b.w + 0.001 && a.y + a.h <= b.y + b.h + 0.001; }
+    function formatCm(v) { return Number(v).toLocaleString('es-CO', { maximumFractionDigits: 1 }); }
+    function formatMm(v) { return Number(v).toLocaleString('es-CO', { maximumFractionDigits: 1 }); }
+    function formatArea(v) { return v >= 10000 ? `${(v/10000).toLocaleString('es-CO',{maximumFractionDigits:2})} m2` : `${v.toLocaleString('es-CO',{maximumFractionDigits:0})} cm2`; }
+    function formatRect(r) { return `${formatCm(r.w)} x ${formatCm(r.h)} cm`; }
+    function formatCOP(v) { return v.toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }); }
+    function escapeAttr(v) { return String(v ?? '').replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;'); }
   </script>
 </body>
 </html>
