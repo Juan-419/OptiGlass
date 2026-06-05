@@ -1,23 +1,39 @@
-# OptiGlass
+# 🪟 OptiGlass
 
-OptiGlass es una aplicacion web para optimizar cortes rectangulares sobre una lamina de vidrio u otros materiales planos. Permite registrar piezas con cantidades, calcular una distribucion de corte y visualizar el aprovechamiento del material en un plano interactivo.
+**Demo en línea:** https://optiglass.onrender.com
 
-## Caracteristicas
+OptiGlass es una aplicación web para optimizar cortes rectangulares sobre láminas de vidrio y otros materiales planos. Calcula distribuciones eficientes, reduce desperdicios y proporciona una visualización gráfica del plano de corte para facilitar la planificación y ejecución de trabajos de corte.
 
-- Configuracion de ancho, alto, espesor y margen de corte de la lamina.
-- Tamano inicial de lamina de 250 cm x 360 cm.
-- Espesores de vidrio por uso: 4 mm, 6 mm, 8 mm y 10 mm o mas.
-- Registro de multiples piezas con cantidad, duplicado y eliminacion.
+## ✨ Características
+
+- Configuración de ancho, alto, espesor y margen de corte de la lámina.
+- Tamaño inicial de lámina de 250 cm × 360 cm.
+- Espesores de vidrio por uso: 4 mm, 6 mm, 8 mm y 10 mm o más.
+- Registro de múltiples piezas con cantidad, duplicado y eliminación.
 - Validaciones para dimensiones, cantidades y piezas que no caben.
-- Rotacion automatica de piezas cuando mejora el acomodo.
+- Rotación automática de piezas cuando mejora el acomodo.
 - Algoritmo multipasada basado en Guillotine Best Short Side Fit.
-- Metricas de aprovechamiento, desperdicio, piezas colocadas y sobrante.
+- Métricas de aprovechamiento, desperdicio, piezas colocadas y sobrante.
 - Plano visual en Canvas con colores, leyenda y marcas de piezas rotadas.
-- Exportacion del plano como imagen PNG.
-- Guardado automatico del ultimo pedido en el navegador.
+- Exportación del plano como imagen PNG.
+- Generación de órdenes de corte en PDF.
+- Historial de pedidos.
+- Gestión de datos de cliente y notas.
+- Cálculo de costos de material y desperdicio.
+- Soporte para múltiples láminas.
+- Guardado automático del último pedido en el navegador.
 - Compatibilidad con modo claro y modo oscuro.
 
-## Estructura
+## 🛠 Tecnologías
+
+- HTML5
+- CSS3
+- JavaScript (Vanilla JS)
+- Canvas API
+- Flask (opcional para despliegue local)
+- LocalStorage
+
+## 📂 Estructura
 
 ```text
 OptiGlass/
@@ -27,15 +43,15 @@ OptiGlass/
 `-- README.md
 ```
 
-## Uso local
+## 🚀 Uso local
 
-### Opcion 1: abrir el archivo
+### Opción 1: abrir el archivo
 
 Abre `index.html` directamente en un navegador moderno.
 
-### Opcion 2: usar Flask
+### Opción 2: usar Flask
 
-Instala dependencias:
+Instala las dependencias:
 
 ```bash
 pip install -r requirements.txt
@@ -53,68 +69,114 @@ Luego abre:
 http://127.0.0.1:5000
 ```
 
-## Como usar
+## 📋 Cómo usar
 
-1. Ingresa las dimensiones de la lamina.
+1. Ingresa las dimensiones de la lámina.
 2. Elige el espesor del vidrio.
-3. Ajusta el margen de corte o kerf en milimetros si necesitas cambiar el sugerido.
+3. Ajusta el margen de corte (kerf) si es necesario.
 4. Agrega las piezas con ancho, alto y cantidad.
-5. Haz clic en `Calcular corte optimo`.
-6. Revisa las metricas, el plano de corte y la leyenda.
-7. Usa `Exportar PNG` para guardar el plano.
+5. Haz clic en **Calcular corte óptimo**.
+6. Revisa las métricas de aprovechamiento y desperdicio.
+7. Analiza el plano visual generado.
+8. Exporta el resultado como PNG o PDF si lo deseas.
 
-## Espesores
+## 🪟 Espesores
 
-El espesor ajusta el kerf minimo sugerido y cambia la recomendacion de corte.
+El espesor ajusta el kerf mínimo sugerido y modifica la recomendación de corte.
 
-El kerf (o rodaja) es el espacio que consume el disco o rueda de corte al pasar sobre el vidrio. Si no se tiene en cuenta, las piezas pueden salir ligeramente mas pequeñas de lo pedido y el error se acumula en cortes consecutivos.
+El kerf (o rodaja) es el espacio que consume la herramienta de corte al atravesar el material. Tenerlo en cuenta evita errores acumulativos en las dimensiones finales de las piezas.
 
-| Espesor | Uso | Kerf minimo |
-| --- | --- | --- |
-| 4 mm | Ventanas pequenas o claraboyas | 2 mm |
-| 6 mm | Ventanas de viviendas y mesas | 3 mm |
+| Espesor | Uso | Kerf mínimo |
+|----------|----------|----------|
+| 4 mm | Ventanas pequeñas o claraboyas | 2 mm |
+| 6 mm | Ventanas residenciales y mesas | 3 mm |
 | 8 mm | Puertas de ducha | 4 mm |
-| 10 mm o mas | Mamparas y divisiones de oficina | 5 mm |
+| 10 mm o más | Mamparas y divisiones | 5 mm |
 
-## Algoritmo
+## 🧠 Algoritmo
 
-La aplicacion usa una variante del algoritmo Guillotine Best Short Side Fit. Para mejorar el resultado, prueba varias ordenaciones de piezas: area, lado mayor, ancho, alto y diferencia entre lados. En cada intento permite rotacion y conserva la mejor distribucion encontrada.
+La aplicación utiliza una variante del algoritmo **Guillotine Best Short Side Fit (BSSF)**.
 
-El kerf se aplica como separacion entre cortes al dividir los rectangulos libres. Esto evita rechazar piezas que caben justo en el borde de la lamina, pero mantiene espacio para el margen de corte entre piezas.
+Para mejorar los resultados, OptiGlass evalúa múltiples estrategias de ordenamiento:
 
-## Interpretacion
+- Área descendente.
+- Lado mayor.
+- Ancho.
+- Alto.
+- Diferencia entre lados.
 
-- Corte eficiente: aprovechamiento igual o superior al 85%.
-- Corte aceptable: aprovechamiento entre 65% y 84.9%.
-- Corte ineficiente: aprovechamiento inferior al 65%.
+En cada intento permite rotación de piezas y conserva la distribución con menor desperdicio encontrada.
 
-## Mejoras incluidas en v1.3
+El kerf se aplica durante la división de los rectángulos libres para mantener el margen de corte entre piezas.
 
-- Canvas de distribucion visual ocupa todo el ancho del panel.
-- Eliminado el fondo de patron en el area sobrante del plano de corte.
-- Version actualizada en el footer de la aplicacion.
+## 📊 Interpretación de resultados
 
-## Mejoras incluidas en v1.2
+### ✅ Corte eficiente
+
+Aprovechamiento igual o superior al 85%.
+
+### ⚠️ Corte aceptable
+
+Aprovechamiento entre 65% y 84.9%.
+
+### ❌ Corte ineficiente
+
+Aprovechamiento inferior al 65%.
+
+## 📈 Historial de versiones
+
+### v1.5
+
+- Historial de pedidos.
+- Gestión de clientes y notas.
+- Exportación de órdenes de corte en PDF.
+- Soporte para múltiples láminas.
+- Cálculo de costos de material.
+- Navegación entre láminas.
+- Mejoras generales de estabilidad y experiencia de usuario.
+
+### v1.3
+
+- Canvas de distribución visual ocupa todo el ancho disponible.
+- Eliminado el patrón de fondo en el área sobrante.
+- Actualización de versión en el footer.
+
+### v1.2
 
 - Selector de espesor con usos recomendados.
-- Ajuste automatico del kerf minimo segun espesor.
-- Tamano inicial actualizado a 250 cm x 360 cm.
-- Visualizacion de sobrante total y mayor sobrante reutilizable.
+- Ajuste automático del kerf mínimo según espesor.
+- Tamaño inicial actualizado a 250 cm × 360 cm.
+- Visualización de sobrante total y mayor sobrante reutilizable.
 
-## Mejoras incluidas en v1.1
+### v1.1
 
-- Correccion de textos con codificacion rota.
+- Corrección de textos con codificación incorrecta.
 - Renombrado del archivo principal a `index.html`.
-- Actualizacion del servidor Flask.
-- Validaciones mas estrictas.
-- Guardado automatico con `localStorage`.
+- Actualización del servidor Flask.
+- Validaciones más estrictas.
+- Guardado automático con `localStorage`.
 - Botones para cargar ejemplo, limpiar, duplicar piezas y exportar PNG.
-- Visualizacion mas legible y responsive.
+- Mejoras de diseño responsive.
 
-## Autor
+## 🎯 Casos de uso
 
-Juan David Vega Alfonso, estudiante de Ingenieria de Sistemas.
+OptiGlass puede utilizarse para:
 
-## Licencia
+- Vidrierías.
+- Talleres de aluminio y vidrio.
+- Fabricación de espejos.
+- Corte de acrílico.
+- Corte de MDF.
+- Corte de láminas metálicas.
+- Procesos de manufactura ligera.
+
+## 👨‍💻 Autor
+
+Juan David Vega Alfonso  
+Estudiante de Ingeniería de Sistemas.
+
+## 📄 Licencia
 
 MIT License.
+
+Puedes utilizar, modificar y distribuir este proyecto libremente respetando los términos de la licencia MIT.
